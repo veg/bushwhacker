@@ -165,12 +165,12 @@
     .status-dot.error { background: var(--fail-ink); }
     @keyframes pulseLed { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); opacity: 0.7; } }
 
-    .pack-switcher-wrap {
+    .dataset-switcher-wrap {
       display: flex;
       align-items: center;
       gap: 6px;
       min-width: 0;
-      flex: 0 1 330px;
+      flex: 0 1 320px;
       border-left: 1px solid var(--border-hairline);
       padding-left: 10px;
     }
@@ -436,9 +436,11 @@
     }
     .toggle-chip input { accent-color: var(--accent-primary); cursor: pointer; }
 
-    /* Hide fine mathematical controls inside drawer when in Guided mode */
-    body[data-mode="guided"] .pro-only-param { display: none; }
-    body[data-mode="guided"] .pro-only-param.advanced-open { display: inline-flex; }
+    /* In Guided mode, hide advanced parameter ribbon & busy pro controls unless opened */
+    body[data-mode="guided"] .pro-top-btn { display: none; }
+    body[data-mode="guided"] .pro-tree-ctrl { display: none; }
+    body[data-mode="guided"] .pro-only-footer { display: none; }
+    body[data-mode="guided"]:not(.guided-params-open) .param-ribbon { display: none; }
     body[data-mode="pro"] #btnToggleAdvParams { display: none; }
 
     .delta-pill {
@@ -459,172 +461,131 @@
     .delta-pill.visible { display: inline-flex; }
 
     /* =================================================================== */
-    /* MODE A: GUIDED WORKSPACE (DEFAULT PROGRESSIVE DISCLOSURE)           */
+    /* MODE A: GUIDED WORKSPACE (CALM PROGRESSIVE DISCLOSURE)              */
     /* =================================================================== */
     #guidedRoot {
       display: none;
-      max-width: 1320px;
+      max-width: 980px;
       width: 100%;
       margin: 0 auto;
-      padding: 16px 20px 36px;
+      padding: 24px 20px 44px;
       flex: 1 0 auto;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
     body[data-mode="guided"] #guidedRoot { display: flex; }
 
-    .guided-stepper-strip {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr)) 280px;
-      gap: 10px;
+    .guided-dropbar {
       background: var(--bg-surface);
-      border: 1px solid var(--border-hairline);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      box-shadow: var(--shadow-sm);
-      align-items: stretch;
-    }
-    @media (max-width: 1040px) {
-      .guided-stepper-strip { grid-template-columns: 1fr 1fr; }
-    }
-
-    .step-card {
-      background: var(--bg-canvas);
-      border: 1px solid var(--border-hairline);
-      border-radius: 6px;
-      padding: 10px 12px;
+      border: 1px dashed var(--border-strong);
+      border-radius: 10px;
+      padding: 12px 18px;
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .step-kicker {
-      font-family: var(--font-mono);
-      font-size: 10.5px;
-      font-weight: 700;
-      color: var(--accent-primary);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .step-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-    .step-desc  { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
-
-    .compact-dropzone {
-      border: 1.5px dashed var(--border-strong);
-      background: var(--bg-subtle);
-      border-radius: 6px;
-      padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 6px;
-      cursor: pointer;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
       transition: border-color 0.14s, background 0.14s;
     }
-    .compact-dropzone:hover, .compact-dropzone.dragover {
+    .guided-dropbar.dragover {
       border-color: var(--accent-primary);
       background: var(--bg-active);
     }
 
-    .pack-chips-bar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .pack-chip {
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border-hairline);
-      background: var(--bg-surface);
-      color: var(--text-secondary);
-      font-size: 11.5px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.12s;
-    }
-    .pack-chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
-    .pack-chip.active { background: var(--bg-active); border-color: var(--accent-primary); color: var(--accent-primary); }
-
-    .surface-card {
+    .guided-hero-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-hairline);
-      border-radius: var(--radius);
+      border-radius: 10px;
       box-shadow: var(--shadow-sm);
       overflow: hidden;
     }
-    .surface-card-hdr {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-hairline);
-      background: var(--bg-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .kpi-grid-5 {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      border-top: 1px solid var(--border-hairline);
-    }
-    @media (max-width: 960px) { .kpi-grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    .kpi-cell {
-      padding: 12px 16px;
-      border-right: 1px solid var(--border-hairline);
-      min-width: 0;
-    }
-    .kpi-cell:last-child { border-right: none; }
-    .kpi-val {
-      font-family: var(--font-mono);
-      font-size: 19px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-top: 3px;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .kpi-sub { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
-
-    .guided-outcomes-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    @media (max-width: 960px) { .guided-outcomes-grid { grid-template-columns: 1fr; } }
-
-    .outcome-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-hairline);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      box-shadow: var(--shadow-sm);
+    .guided-hero-top {
+      padding: 18px 22px 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 14px;
     }
-    .outcome-head {
+    .guided-hero-head {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 8px;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-    .outcome-title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
-    .outcome-narrative { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
-    .outcome-proof-panel {
-      display: none;
+    .guided-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      padding-top: 14px;
       border-top: 1px solid var(--border-hairline);
-      padding-top: 10px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+    @media (max-width: 720px) {
+      .guided-stats-row { grid-template-columns: 1fr; gap: 10px; }
+    }
+    .guided-stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .guided-stat-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .guided-stat-val {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .guided-tree-host {
+      border-top: 1px solid var(--border-hairline);
+      height: 430px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .guided-accordions {
+      display: flex;
       flex-direction: column;
       gap: 8px;
     }
-    .outcome-proof-panel.open { display: flex; }
-
+    .guided-accordion {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .guided-accordion > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      user-select: none;
+    }
+    .guided-accordion > summary::-webkit-details-marker { display: none; }
+    .guided-accordion > summary:hover { background: var(--bg-canvas); }
+    .guided-accordion-body {
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--border-hairline);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
     .cli-box {
       background: var(--bg-subtle);
       border: 1px solid var(--border-hairline);
@@ -1179,17 +1140,16 @@
         <span id="wasmStatusText" class="mono" style="font-size:10.5px; color:var(--text-muted); font-weight:500;">Booting WASM…</span>
       </div>
 
-      <div class="pack-switcher-wrap">
-        <span class="micro-label" style="white-space:nowrap;">Pack</span>
-        <select id="packSelect" class="clean-select" style="width:100%; min-width:150px;" onchange="onPackSelectChange()" title="Hot-swappable Domain Specification Pack"></select>
+      <div class="dataset-switcher-wrap">
+        <select id="datasetSelect" class="clean-select" style="width:100%; min-width:160px;" aria-label="Example dataset" title="Choose an example alignment or tree" onchange="onDatasetSelectChange()"></select>
       </div>
     </div>
 
     <div class="topbar-actions">
       <input type="file" id="fileInput" accept=".fa,.fasta,.faa,.fna,.cds,.phy,.phylip,.nex,.nexus,.csv,.tsv,.nwk,.newick,.tre,.txt,.json,.bwz" style="display:none" onchange="handleFileUpload(event)" />
-      <button class="btn" onclick="document.getElementById('fileInput').click()" title="Upload FASTA, FAA, PHYLIP, NEXUS, CSV/TSV, Newick, .bwz, or Pack JSON">Upload</button>
-      <button class="btn" onclick="openPasteModal()" title="Paste sequence alignment, character matrix, or Newick">Paste</button>
-      <button class="btn" onclick="openStreamModal()" title="Stream live cohorts from NCBI Entrez, EMBL-EBI ENA, or HTTPS URL">🌐 Fetch</button>
+      <button class="btn pro-top-btn" onclick="document.getElementById('fileInput').click()" title="Upload FASTA, FAA, PHYLIP, NEXUS, CSV/TSV, Newick, JSON, or .bwz">Upload</button>
+      <button class="btn pro-top-btn" onclick="openPasteModal()" title="Paste sequence alignment, character matrix, or Newick">Paste</button>
+      <button class="btn pro-top-btn" onclick="openStreamModal()" title="Stream live cohorts from NCBI Entrez, EMBL-EBI ENA, or HTTPS URL">🌐 Fetch</button>
 
       <div class="mode-pill" role="group" aria-label="Workspace Density Mode">
         <button id="btnUiGuided" class="mode-pill-btn active" onclick="setUiMode('guided')" title="Guided progressive disclosure view (m)">
@@ -1253,9 +1213,7 @@
         </select>
       </div>
 
-      <button id="btnToggleAdvParams" class="btn btn-xs" onclick="toggleGuidedAdvParams()">Advanced Parameters ▾</button>
-
-      <div class="param-ctrl pro-only-param" id="wrapParamCoding" title="Dual-entropy 3rd-codon position weighting w_3">
+      <div class="param-ctrl" id="wrapParamCoding" title="Dual-entropy 3rd-codon position weighting w_3">
         <span class="param-ctrl-lbl">w₃</span>
         <select id="paramCodingMode" class="param-mini-sel" onchange="onParameterChange(true)">
           <option value="auto">Auto</option>
@@ -1264,14 +1222,14 @@
         </select>
       </div>
 
-      <div class="param-ctrl pro-only-param" id="wrapParamShunts" title="Enable Stage 2 Reticulate Shunt Peeling">
+      <div class="param-ctrl" id="wrapParamShunts" title="Enable Stage 2 Reticulate Shunt Peeling">
         <label class="toggle-chip">
           <input type="checkbox" id="paramDetectShunts" checked onchange="onParameterChange(true)" />
           <span>Shunts</span>
         </label>
       </div>
 
-      <div class="param-ctrl pro-only-param" id="wrapParamMinShunt" title="Minimum parallel sites m_min required for a reticulate shunt">
+      <div class="param-ctrl" id="wrapParamMinShunt" title="Minimum parallel sites m_min required for a reticulate shunt">
         <span class="param-ctrl-lbl">m<sub>min</sub></span>
         <select id="paramMinShunt" class="param-mini-sel" onchange="onParameterChange(true)">
           <option value="1">1</option>
@@ -1284,7 +1242,7 @@
         </select>
       </div>
 
-      <div class="param-ctrl pro-only-param" id="wrapParamPLocal" title="Local posterior gate floor P_local">
+      <div class="param-ctrl" id="wrapParamPLocal" title="Local posterior gate floor P_local">
         <span class="param-ctrl-lbl">P≥</span>
         <select id="paramPLocalFloor" class="param-mini-sel" onchange="onParameterChange(false)">
           <option value="0.50" selected>0.50</option>
@@ -1295,135 +1253,121 @@
         </select>
       </div>
 
-      <div class="param-ctrl pro-only-param" id="wrapParamEmpAlpha" title="Estimate empirical Gamma rate shape alpha via Fitch method-of-moments (--empirical-alpha)">
+      <div class="param-ctrl" id="wrapParamEmpAlpha" title="Estimate empirical Gamma rate shape alpha via Fitch method-of-moments (--empirical-alpha)">
         <label class="toggle-chip">
           <input type="checkbox" id="paramEmpiricalAlpha" onchange="onParameterChange(true)" />
           <span>α<sub>emp</sub></span>
         </label>
       </div>
 
-      <div class="param-ctrl pro-only-param" id="wrapParamNoMultPen" title="Disable combinadic branch multiplicity penalty (--no-mult-pen)">
+      <div class="param-ctrl" id="wrapParamNoMultPen" title="Disable combinadic branch multiplicity penalty (--no-mult-pen)">
         <label class="toggle-chip">
           <input type="checkbox" id="paramNoMultPen" onchange="onParameterChange(true)" />
           <span>NoMult</span>
         </label>
       </div>
 
-      <div class="param-ctrl pro-only-param" id="wrapParamDedup" title="Exclude identical sequence duplicates before induction">
+      <div class="param-ctrl" id="wrapParamDedup" title="Exclude identical sequence duplicates before induction">
         <label class="toggle-chip">
           <input type="checkbox" id="paramDedupTaxa" onchange="onParameterChange(true)" />
           <span>Dedup</span>
         </label>
       </div>
 
-      <button class="btn btn-xs pro-only-param" id="btnStartTreeFlag" onclick="openStartingTreeModal()" title="Optional constraint Newick tree for MDL branch contraction (-t)">-t Tree</button>
+      <button class="btn btn-xs" id="btnStartTreeFlag" onclick="openStartingTreeModal()" title="Optional constraint Newick tree for MDL branch contraction (-t)">-t Tree</button>
     </div>
 
     <div class="ribbon-group">
-      <button id="deltaPill" class="delta-pill" onclick="activateChangedFilter()" title="Parameters modified relative to pack defaults — click to inspect changed calls">
+      <button id="deltaPill" class="delta-pill" onclick="activateChangedFilter()" title="Parameters modified from defaults — click to inspect changed calls">
         <span id="deltaPillText">Δ 0 calls vs. default</span>
       </button>
-      <button id="btnResetParams" class="btn btn-xs" onclick="resetParametersToDefault()" title="Reset parameters to pack defaults (r)">Reset <kbd>r</kbd></button>
+      <button id="btnResetParams" class="btn btn-xs" onclick="resetParametersToDefault()" title="Reset parameters to defaults (r)">Reset <kbd>r</kbd></button>
       <button class="btn btn-xs" onclick="copyCliCommand()" title="Copy exact reproducible CLI command">CLI</button>
     </div>
   </section>
 
   <!-- =================================================================== -->
-  <!-- MODE A: GUIDED VIEW (DEFAULT PROGRESSIVE DISCLOSURE)                -->
+  <!-- MODE A: GUIDED VIEW (CALM PROGRESSIVE DISCLOSURE)                   -->
   <!-- =================================================================== -->
-  <main id="guidedRoot">
-    <!-- 1-2-3 Workflow Strip & Compact Dropzone -->
-    <section class="guided-stepper-strip">
-      <div class="step-card">
-        <span class="step-kicker">Step 1 · Cohort &amp; Alphabet</span>
-        <div class="step-title">Select Domain Pack or Drop File</div>
-        <div class="step-desc">Runs DNA/RNA, 20-state Protein, Binary/Ordered CSV matrices, Newick trees, or <code>.bwz</code> locally in WASM.</div>
+  <main id="guidedRoot"
+        ondragover="onDropzoneDragOver(event)"
+        ondragleave="onDropzoneDragLeave(event)"
+        ondrop="onDropzoneDrop(event)">
+    <!-- Element 1: Quiet Single-Line Drop / Input Bar -->
+    <div id="guidedDropzone" class="guided-dropbar">
+      <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+        <strong style="font-size:13px; color:var(--text-primary);">Analyze your own sequences or tree</strong>
+        <span style="font-size:12px; color:var(--text-muted);">Drop a FASTA, PHYLIP, NEXUS, CSV/TSV, Newick, or <code>.bwz</code> file anywhere on this page — runs 100% locally in WebAssembly.</span>
       </div>
-      <div class="step-card">
-        <span class="step-kicker">Step 2 · MDL Compression Verdicts</span>
-        <div class="step-title">Splits, Polytomies &amp; Shunts</div>
-        <div class="step-desc">Replaces continuous branch priors with exact combinadic code lengths—collapsing zero-evidence stems into hubs.</div>
+      <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Choose File…</button>
+        <button class="btn" onclick="openPasteModal()">Paste</button>
+        <button class="btn" onclick="openStreamModal()">Fetch NCBI / URL</button>
       </div>
-      <div class="step-card">
-        <span class="step-kicker">Step 3 · Visual Forensic Proof</span>
-        <div class="step-title">Expand or Open Workbench <kbd>m</kbd></div>
-        <div class="step-desc">Inspect 4-gate scorecards, linked coordinate tracks, counterfactual tables, and export SVG/TSV/CLI scripts.</div>
-      </div>
-      <div id="guidedDropzone" class="compact-dropzone"
-           onclick="document.getElementById('fileInput').click()"
-           ondragover="onDropzoneDragOver(event)"
-           ondragleave="onDropzoneDragLeave(event)"
-           ondrop="onDropzoneDrop(event)">
-        <div style="font-size:12px; font-weight:700; color:var(--text-primary);">↑ Drop FASTA / CSV / .nwk / .bwz</div>
-        <div style="font-size:11px; color:var(--text-muted);">100% Client-Side Rust WASM · Zero Upload</div>
-      </div>
-    </section>
+    </div>
 
-    <!-- Quick Pack Selector Chips across all 9 modalities -->
-    <div class="pack-chips-bar" id="guidedPackChips"></div>
-
-    <!-- Hero Compression Summary Card -->
-    <section class="surface-card">
-      <div class="surface-card-hdr">
-        <div style="min-width:0; flex:1;">
-          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:2px;">
-            <span id="gPackBadge" class="status-badge ref">PRESTIN CDS</span>
-            <span id="gDeltaNote" class="status-badge warn" style="display:none;">~ Tuned Override</span>
+    <!-- Element 2: Unified Plain-Language Summary + Live Tree Card -->
+    <section class="guided-hero-card">
+      <div class="guided-hero-top">
+        <div class="guided-hero-head">
+          <div style="min-width:0; flex:1;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+              <span id="gDatasetBadge" class="status-badge ref">PRESTIN CDS</span>
+              <span id="gDeltaNote" class="status-badge warn" style="display:none;">~ Tuned Override</span>
+            </div>
+            <h1 id="gHeadlineVerdict" style="font-size:17px; font-weight:700; color:var(--text-primary); letter-spacing:-0.01em;">Loading example cohort in WebAssembly…</h1>
+            <p id="gSubVerdict" style="font-size:13px; color:var(--text-secondary); margin-top:4px;">BUSHWHACKER compresses sequences along a phylogeny—collapsing unsupported splits into polytomies and isolating convergent or horizontal transfer signals.</p>
           </div>
-          <div id="gHeadlineVerdict" style="font-size:15px; font-weight:700; color:var(--text-primary);">Loading cohort in WebAssembly…</div>
+          <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+            <button id="btnGuidedSettings" class="btn" onclick="toggleGuidedSettings()">Settings ▾</button>
+            <button class="btn btn-primary" onclick="setUiMode('pro')">Open Workbench <kbd style="background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.35); color:#fff;">m</kbd></button>
+          </div>
         </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <button class="btn" onclick="openHelpModal()">MDL Math &amp; Shortcuts</button>
-          <button class="btn btn-primary" onclick="setUiMode('pro')">Open Pro Workbench <kbd style="background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.35); color:#fff;">m</kbd></button>
+
+        <div class="guided-stats-row">
+          <div class="guided-stat-item">
+            <span class="guided-stat-label">Compression</span>
+            <div><strong id="gStatComp" class="guided-stat-val" style="color:var(--pass-ink);">—</strong> <span id="gStatCompSub" class="mono" style="font-size:11.5px; color:var(--text-muted);"></span></div>
+          </div>
+          <div class="guided-stat-item">
+            <span class="guided-stat-label">Tree Structure</span>
+            <div><strong id="gStatTopo" class="guided-stat-val">—</strong> <span class="mono" style="font-size:11.5px; color:var(--text-muted);">unsupported stems collapsed</span></div>
+          </div>
+          <div class="guided-stat-item">
+            <span class="guided-stat-label">Non-Tree Signal</span>
+            <div><strong id="gStatShunt" class="guided-stat-val" style="color:var(--sparse-ink);">—</strong> <span id="gStatShuntSub" class="mono" style="font-size:11.5px; color:var(--text-muted);"></span></div>
+          </div>
         </div>
       </div>
 
-      <div class="kpi-grid-5">
-        <div class="kpi-cell">
-          <div class="micro-label">Cohort Dimensions</div>
-          <div id="gKpiDims" class="kpi-val">—</div>
-          <div id="gKpiDimsSub" class="kpi-sub">Taxa × columns</div>
-        </div>
-        <div class="kpi-cell">
-          <div class="micro-label">Effective Sites (L_eff)</div>
-          <div id="gKpiLeff" class="kpi-val">—</div>
-          <div id="gKpiLeffSub" class="kpi-sub">Coherence-weighted</div>
-        </div>
-        <div class="kpi-cell">
-          <div class="micro-label">Star → Graph MDL</div>
-          <div id="gKpiMdl" class="kpi-val" style="color:var(--pass-ink);">—</div>
-          <div id="gKpiMdlSub" class="kpi-sub">Nats compressed</div>
-        </div>
-        <div class="kpi-cell">
-          <div class="micro-label">Splits / Polytomies</div>
-          <div id="gKpiTopo" class="kpi-val">—</div>
-          <div id="gKpiTopoSub" class="kpi-sub">Calibrated tree structure</div>
-        </div>
-        <div class="kpi-cell">
-          <div class="micro-label">Reticulate Shunts</div>
-          <div id="gKpiShunts" class="kpi-val" style="color:var(--sparse-ink);">—</div>
-          <div id="gKpiShuntsSub" class="kpi-sub">SPARSE / INTERVAL</div>
-        </div>
-      </div>
+      <!-- Always-visible Interactive Tree Canvas in Guided Mode -->
+      <div id="guidedTreeHost" class="guided-tree-host"></div>
     </section>
 
-    <!-- 4 Breathable Summary Outcome Cards -->
-    <section class="guided-outcomes-grid">
-      <!-- Card 1: QA & Site Coherence -->
-      <article class="outcome-card">
-        <div class="outcome-head">
+    <!-- Element 3: Quiet Collapsible Accordions (Closed by Default) -->
+    <section class="guided-accordions">
+      <details class="guided-accordion" id="accShunts">
+        <summary>
+          <span>Non-Tree Shunts &amp; Convergence</span>
+          <span id="gShuntBadge" class="status-badge sparse">0 SHUNTS</span>
+        </summary>
+        <div class="guided-accordion-body">
+          <p id="gShuntNarrative" style="font-size:12.5px; color:var(--text-secondary);">—</p>
+          <div id="gShuntList" style="display:flex; flex-direction:column; gap:6px;"></div>
+          <div id="gShuntProofDetail" style="font-size:12px; color:var(--text-secondary);"></div>
           <div>
-            <div class="micro-label">Outcome 1 · Sequence &amp; Taxon QA</div>
-            <div class="outcome-title">Alignment Audit &amp; Coherence Weighting</div>
+            <button class="btn btn-xs" onclick="inspectFirstByKind('SHUNT')">Inspect 4-Track Proof in Workbench →</button>
           </div>
+        </div>
+      </details>
+
+      <details class="guided-accordion" id="accQa">
+        <summary>
+          <span>Sequence Quality &amp; Taxon Inclusion</span>
           <span id="gQaBadge" class="status-badge pass">PASS ✓</span>
-        </div>
-        <p id="gQaNarrative" class="outcome-narrative">—</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-xs" onclick="toggleGuidedProof('proofQa', this)">Show Site Horizon &amp; Taxon Table ▾</button>
-          <button class="btn btn-xs" onclick="inspectFirstByKind('TAXON')">Inspect Taxa in Workbench →</button>
-        </div>
-        <div id="gProofQa" class="outcome-proof-panel">
+        </summary>
+        <div class="guided-accordion-body">
+          <p id="gQaNarrative" style="font-size:12.5px; color:var(--text-secondary);">—</p>
           <div id="gQaHorizonSvg"></div>
           <div style="max-height:220px; overflow-y:auto; border:1px solid var(--border-hairline); border-radius:6px;">
             <table class="mini-table">
@@ -1432,70 +1376,28 @@
             </table>
           </div>
         </div>
-      </article>
+      </details>
 
-      <!-- Card 2: Calibrated Tree & Polytomies -->
-      <article class="outcome-card">
-        <div class="outcome-head">
-          <div>
-            <div class="micro-label">Outcome 2 · Backbone Tree Calibration</div>
-            <div class="outcome-title">Binary Splits vs. Polytomy Hubs</div>
+      <details class="guided-accordion" id="accExports">
+        <summary>
+          <span>Downloads, Lossless .bwz Archive &amp; CLI</span>
+          <span class="status-badge slate">Exports &amp; CLI</span>
+        </summary>
+        <div class="guided-accordion-body">
+          <p style="font-size:12.5px; color:var(--text-secondary);">Reproduce this run with the native Rust CLI or save results and lossless compressed <code>.bwz</code> archives locally.</p>
+          <div class="cli-box">
+            <code id="gCliCommandText" style="font-size:11px;">bushwhacker data/specimens/prestin.fasta -T 1</code>
+            <button class="btn btn-xs" onclick="copyCliCommand()">Copy CLI</button>
           </div>
-          <span id="gTreeBadge" class="status-badge pass">PASS ✓</span>
-        </div>
-        <p id="gTreeNarrative" class="outcome-narrative">—</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-xs" id="btnToggleGuidedTree" onclick="toggleGuidedTreePreview()">Preview Interactive Tree Canvas ▾</button>
-          <button class="btn btn-xs" onclick="inspectFirstByKind('POLYTOMY')">Inspect Hubs in Workbench →</button>
-        </div>
-        <div id="gProofTree" class="outcome-proof-panel">
-          <div id="guidedTreeHost" style="border:1px solid var(--border-hairline); border-radius:6px; overflow:hidden; height:420px; display:flex; flex-direction:column;"></div>
-        </div>
-      </article>
-
-      <!-- Card 3: Reticulate Shunts -->
-      <article class="outcome-card">
-        <div class="outcome-head">
-          <div>
-            <div class="micro-label">Outcome 3 · Reticulate Shunt Peeling</div>
-            <div class="outcome-title">Convergence (SPARSE) vs. Mosaic (INTERVAL)</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-xs btn-primary" onclick="downloadStandaloneDossierHtml()">↓ Standalone Dossier (.html)</button>
+            <button class="btn btn-xs" onclick="exportLosslessBwzArchive()" style="border-color:var(--sparse-bd); color:var(--sparse-ink);">↓ Compress .bwz</button>
+            <button class="btn btn-xs" onclick="exportNewickFile()">↓ Newick (.nwk)</button>
+            <button class="btn btn-xs" onclick="exportVectorTreeSvg()">↓ Tree SVG</button>
+            <button class="btn btn-xs" onclick="exportMatrixTable('tsv')">↓ Matrix TSV</button>
           </div>
-          <span id="gShuntBadge" class="status-badge sparse">0 SHUNTS</span>
         </div>
-        <p id="gShuntNarrative" class="outcome-narrative">—</p>
-        <div id="gShuntList" style="display:flex; flex-direction:column; gap:6px;"></div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-xs" onclick="toggleGuidedProof('proofShunts', this)">Show Competing Mask Proof ▾</button>
-          <button class="btn btn-xs" onclick="inspectFirstByKind('SHUNT')">Open 4-Track Proof in Workbench →</button>
-        </div>
-        <div id="gProofShunts" class="outcome-proof-panel">
-          <div id="gShuntProofDetail" style="font-size:12px; color:var(--text-secondary);"></div>
-        </div>
-      </article>
-
-      <!-- Card 4: Lossless .bwz, Dossier & CLI -->
-      <article class="outcome-card">
-        <div class="outcome-head">
-          <div>
-            <div class="micro-label">Outcome 4 · Reproducibility &amp; Compression</div>
-            <div class="outcome-title">Lossless .bwz Archive, CLI &amp; Dossier</div>
-          </div>
-          <span class="status-badge pass">LOCAL WASM ✓</span>
-        </div>
-        <p id="gExportNarrative" class="outcome-narrative">
-          Reproduce this exact run in native Rust CLI or archive the complete alignment + induced graph into a bit-identical <code>.bwz</code> stream via causal preorder arithmetic coding.
-        </p>
-        <div class="cli-box">
-          <code id="gCliCommandText" style="font-size:11px;">bushwhacker data/specimens/prestin.fasta -T 1</code>
-          <button class="btn btn-xs" onclick="copyCliCommand()">Copy CLI</button>
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-xs btn-primary" onclick="downloadStandaloneDossierHtml()">↓ Standalone Dossier (.html)</button>
-          <button class="btn btn-xs" onclick="exportLosslessBwzArchive()" style="border-color:var(--sparse-bd); color:var(--sparse-ink);">↓ Compress .bwz</button>
-          <button class="btn btn-xs" onclick="exportVectorTreeSvg()">↓ Tree SVG</button>
-          <button class="btn btn-xs" onclick="exportMatrixTable('tsv')">↓ Matrix TSV</button>
-        </div>
-      </article>
+      </details>
     </section>
   </main>
 
@@ -1599,25 +1501,25 @@
           <button id="btnLayoutCladogram" class="preset-btn" onclick="setLayoutMode('cladogram')">Cladogram</button>
           <button id="btnLayoutCircular" class="preset-btn" onclick="setLayoutMode('circular')">Circular</button>
         </div>
-        <select id="selColorMode" class="clean-select" style="height:25px; font-size:11px;" onchange="renderCanvas()">
+        <select id="selColorMode" class="clean-select pro-tree-ctrl" style="height:25px; font-size:11px;" onchange="renderCanvas()">
           <option value="clade">Color: Clades</option>
           <option value="support">Color: P_local</option>
           <option value="regime">Color: Polytomies</option>
           <option value="mutations">Color: m_e</option>
         </select>
-        <label class="toggle-chip"><input type="checkbox" id="chkShowRibbons" checked onchange="renderCanvas()" /><span>Ribbons</span></label>
-        <label class="toggle-chip"><input type="checkbox" id="chkShowPolytomyBadges" checked onchange="renderCanvas()" /><span>Hub ◆</span></label>
-        <label class="toggle-chip"><input type="checkbox" id="chkShowShunts" checked onchange="renderCanvas()" /><span>Shunts</span></label>
-        <label class="toggle-chip"><input type="checkbox" id="chkHumanLabels" checked onchange="onCommonNamesToggle()" /><span>Species</span></label>
+        <label class="toggle-chip pro-tree-ctrl"><input type="checkbox" id="chkShowRibbons" checked onchange="renderCanvas()" /><span>Ribbons</span></label>
+        <label class="toggle-chip pro-tree-ctrl"><input type="checkbox" id="chkShowPolytomyBadges" checked onchange="renderCanvas()" /><span>Hub ◆</span></label>
+        <label class="toggle-chip pro-tree-ctrl"><input type="checkbox" id="chkShowShunts" checked onchange="renderCanvas()" /><span>Shunts</span></label>
+        <label class="toggle-chip pro-tree-ctrl"><input type="checkbox" id="chkHumanLabels" checked onchange="onCommonNamesToggle()" /><span>Species</span></label>
       </div>
       <div style="display:flex; align-items:center; gap:4px;">
         <button class="btn btn-xs" onclick="fitTreeToScreen()">Fit</button>
         <button class="btn btn-xs" onclick="zoomBy(1.28)">+</button>
         <button class="btn btn-xs" onclick="zoomBy(0.78)">−</button>
-        <button class="btn btn-xs" onclick="expandAllWedges()">Unfold</button>
+        <button class="btn btn-xs pro-tree-ctrl" onclick="expandAllWedges()">Unfold</button>
       </div>
     </div>
-    <div id="legendBar" class="legend-strip"></div>
+    <div id="legendBar" class="legend-strip pro-tree-ctrl"></div>
     <div class="tree-viewport" id="treeViewport">
       <div id="subtreeBanner" class="subtree-banner">
         <span id="subtreeBannerText">Subtree isolated</span>
@@ -1644,11 +1546,10 @@
       <span id="telPerf">— ms (— sites/s)</span>
     </div>
     <div class="footer-group">
-      <span id="telPackVer">Pack v1.0</span>
+      <span id="telDataset">—</span>
       <span>·</span>
       <span>Rust WASM · Zero Server Upload</span>
-      <span>·</span>
-      <span><kbd>m</kbd> mode · <kbd>j</kbd>/<kbd>k</kbd> row · <kbd>/</kbd> find · <kbd>c</kbd> copy · <kbd>r</kbd> reset · <kbd>?</kbd> help</span>
+      <span class="pro-only-footer">· <kbd>m</kbd> mode · <kbd>j</kbd>/<kbd>k</kbd> row · <kbd>/</kbd> find · <kbd>c</kbd> copy · <kbd>r</kbd> reset · <kbd>?</kbd> help</span>
     </div>
   </footer>
 
@@ -1755,7 +1656,7 @@
             <div><kbd>j</kbd> / <kbd>↓</kbd> &amp; <kbd>k</kbd> / <kbd>↑</kbd> Step Matrix rows + sync Canvas &amp; Inspector</div>
             <div><kbd>/</kbd> Focus Matrix search bar (<kbd>Esc</kbd> clears/blurs)</div>
             <div><kbd>c</kbd> Copy active canonical call &amp; metrics</div>
-            <div><kbd>r</kbd> Reset parameters to active Pack defaults</div>
+            <div><kbd>r</kbd> Reset parameters to default settings</div>
             <div><kbd>?</kbd> Toggle this reference overlay</div>
           </div>
         </div>
@@ -1777,7 +1678,7 @@
     import initWasm, { WasmBushwhacker } from './pkg/bushwhacker.js';
 
     // =========================================================================
-    // 1. DECLARATIVE SPECIFICATION PACKS & TAXONOMIC ANNOTATIONS
+    // 1. EXAMPLE DATASETS & TAXONOMIC ANNOTATIONS
     // =========================================================================
     const CLADE_PALETTE = [
       '#1D4ED8', '#C2410C', '#059669', '#6D28D9', '#B45309',
@@ -1940,13 +1841,12 @@
       G: 'Special',   P: 'Special'
     };
 
-    const SPECIFICATION_PACKS = [
+    const EXAMPLE_DATASETS = [
       {
         id: 'prestin',
         shortName: 'Prestin CDS (116×2235)',
         title: 'Mammalian Prestin CDS (SLC26A5) — Echolocation Convergence',
         badge: '116 taxa × 2,235 bp (DNA)',
-        version: 'v1.0',
         file: './examples/prestin.fasta',
         cliInput: 'data/specimens/prestin.fasta',
         defaultParams: { dataMode: 'auto', codingMode: 'auto', detectShunts: true, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -1962,7 +1862,6 @@
         shortName: 'Prestin AA (116×745)',
         title: 'Mammalian Prestin Protein (SLC26A5) — 20-State AA MDL',
         badge: '116 taxa × 745 AA',
-        version: 'v1.0',
         file: './examples/prestin_protein.faa',
         cliInput: 'docs/examples/prestin_protein.faa',
         defaultParams: { dataMode: 'auto', codingMode: 'auto', detectShunts: true, minShuntSites: 3, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -1978,7 +1877,6 @@
         shortName: 'AML Single-Cell (256×31)',
         title: 'Human AML Single-Cell Clones (Morita 2020) — 0/1 Matrix',
         badge: '256 clones × 31 genes',
-        version: 'v1.0',
         file: './examples/aml_clones_binary.csv',
         cliInput: 'docs/examples/aml_clones_binary.csv',
         defaultParams: { dataMode: 'binary', codingMode: 'auto', detectShunts: true, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -1990,7 +1888,6 @@
         shortName: 'Influenza A HA (359×987)',
         title: 'Influenza A Hemagglutinin (HA) — Viral Phylodynamics',
         badge: '359 taxa × 987 bp',
-        version: 'v1.0',
         file: './examples/InfluenzaA.fasta',
         cliInput: 'docs/examples/InfluenzaA.fasta',
         defaultParams: { dataMode: 'auto', codingMode: 'auto', detectShunts: true, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -2005,7 +1902,6 @@
         shortName: 'Beta-Globin (17×432)',
         title: 'Vertebrate Beta-Globin (HBB) — Vertebrate Phylogeny',
         badge: '17 taxa × 432 bp',
-        version: 'v1.0',
         file: './examples/bglobin.fasta',
         cliInput: 'docs/examples/bglobin.fasta',
         defaultParams: { dataMode: 'auto', codingMode: 'auto', detectShunts: true, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -2021,7 +1917,6 @@
         shortName: 'HGT Mosaic (24×900)',
         title: 'Reticulate HGT Mosaic — Horizontal Gene Transfer Block',
         badge: '24 taxa × 900 bp',
-        version: 'v1.0',
         generator: 'hgt',
         cliInput: 'hgt_mosaic_24x900.fasta',
         defaultParams: { dataMode: 'nucleotide', codingMode: 'off', detectShunts: true, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -2037,7 +1932,6 @@
         shortName: 'Polytomy Benchmark (64×600)',
         title: 'Calibrated Polytomy Benchmark — Resolved Stems + Star Burst',
         badge: '64 taxa × 600 bp',
-        version: 'v1.0',
         generator: 'polytomy',
         cliInput: 'polytomy_64x600.fasta',
         defaultParams: { dataMode: 'nucleotide', codingMode: 'off', detectShunts: true, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -2049,7 +1943,6 @@
         shortName: '512-Taxa SIMD Stress',
         title: 'Large-Scale 64-Site SIMD Test — 512 Taxa Alignment',
         badge: '512 taxa × 800 bp',
-        version: 'v1.0',
         generator: 'large512',
         cliInput: 'simd_512x800.fasta',
         defaultParams: { dataMode: 'nucleotide', codingMode: 'off', detectShunts: false, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -2061,7 +1954,6 @@
         shortName: '2,048-Tip Newick Explorer',
         title: 'Global Tree Topology Explorer — 2,048 Tips (Newick)',
         badge: '2,048 tips (.nwk)',
-        version: 'v1.0',
         generator: 'newick2048',
         cliInput: 'global_2048.nwk',
         defaultParams: { dataMode: 'auto', codingMode: 'auto', detectShunts: true, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false },
@@ -2158,8 +2050,7 @@
     // 3. REACTIVE STATE & WORKER BRIDGE
     // =========================================================================
     let uiMode = 'guided';
-    let guidedTreeOpen = false;
-    let advParamsOpen = false;
+    let guidedParamsOpen = false;
 
     let worker = null;
     let fallbackEngine = null;
@@ -2167,8 +2058,8 @@
     let reqCounter = 1;
     const pendingWorkerCalls = new Map();
 
-    let currentPack = SPECIFICATION_PACKS[0];
-    let customPack = null;
+    let currentDataset = EXAMPLE_DATASETS[0];
+    let customDataset = null;
     let currentDatasetLabel = 'prestin.fasta';
     let currentRawText = '';
     let cohortRev = 0;
@@ -2182,8 +2073,8 @@
     let lastComputeMs = 0;
 
     // Baseline vs Tuned Delta tracking
-    let defaultParams = { ...SPECIFICATION_PACKS[0].defaultParams, startingNewick: '' };
-    let activeParams  = { ...SPECIFICATION_PACKS[0].defaultParams, startingNewick: '' };
+    let defaultParams = { ...EXAMPLE_DATASETS[0].defaultParams, startingNewick: '' };
+    let activeParams  = { ...EXAMPLE_DATASETS[0].defaultParams, startingNewick: '' };
     let baselineCallMap = null; // Map<canonicalKey, verdictString>
     let allMatrixRecords = [];
     let filteredMatrixRecords = [];
@@ -2322,12 +2213,10 @@
         } catch (_) {}
       }
       reparentSharedTreeCanvas();
-      if (uiMode === 'pro') {
-        requestAnimationFrame(() => {
-          fitTreeToScreen();
-          renderInspectorTracks();
-        });
-      }
+      requestAnimationFrame(() => {
+        fitTreeToScreen();
+        if (uiMode === 'pro') renderInspectorTracks();
+      });
     };
 
     function reparentSharedTreeCanvas() {
@@ -2338,7 +2227,7 @@
       if (uiMode === 'pro' && proHost) {
         panel.style.display = 'flex';
         if (panel.parentElement !== proHost) proHost.appendChild(panel);
-      } else if (uiMode === 'guided' && guidedTreeOpen && guidedHost) {
+      } else if (uiMode === 'guided' && guidedHost) {
         panel.style.display = 'flex';
         if (panel.parentElement !== guidedHost) guidedHost.appendChild(panel);
       } else {
@@ -2346,29 +2235,11 @@
       }
     }
 
-    window.toggleGuidedTreePreview = function() {
-      guidedTreeOpen = !guidedTreeOpen;
-      const proof = document.getElementById('gProofTree');
-      const btn = document.getElementById('btnToggleGuidedTree');
-      if (proof) proof.classList.toggle('open', guidedTreeOpen);
-      if (btn) btn.textContent = guidedTreeOpen ? 'Hide Interactive Tree Canvas ▴' : 'Preview Interactive Tree Canvas ▾';
-      reparentSharedTreeCanvas();
-      if (guidedTreeOpen) requestAnimationFrame(() => fitTreeToScreen());
-    };
-
-    window.toggleGuidedProof = function(which, btnEl) {
-      const id = which === 'proofQa' ? 'gProofQa' : 'gProofShunts';
-      const panel = document.getElementById(id);
-      if (!panel) return;
-      const open = panel.classList.toggle('open');
-      if (btnEl) btnEl.textContent = btnEl.textContent.replace(/[▾▴]/g, open ? '▴' : '▾');
-    };
-
-    window.toggleGuidedAdvParams = function() {
-      advParamsOpen = !advParamsOpen;
-      document.querySelectorAll('.pro-only-param').forEach(el => el.classList.toggle('advanced-open', advParamsOpen));
-      const btn = document.getElementById('btnToggleAdvParams');
-      if (btn) btn.textContent = advParamsOpen ? 'Advanced Parameters ▴' : 'Advanced Parameters ▾';
+    window.toggleGuidedSettings = function() {
+      guidedParamsOpen = !guidedParamsOpen;
+      document.body.classList.toggle('guided-params-open', guidedParamsOpen);
+      const btn = document.getElementById('btnGuidedSettings');
+      if (btn) btn.textContent = guidedParamsOpen ? 'Settings ▴' : 'Settings ▾';
     };
 
     // =========================================================================
@@ -3259,8 +3130,8 @@
               canonical: prevSig.split('|')[1] || 'SHUNT',
               verdict: { cls: 'fail', label: 'DROPPED ✗' },
               gates: [
-                { code: 'G1', title: 'Threshold Screening', status: 'fail', observed: 'Excluded by m_min / Shunts off', threshold: `Was active in default pack` },
-                { code: 'G2', title: 'Baseline Comparison', status: 'warn', observed: 'Present in pack default', threshold: 'Reset (r) to restore' },
+                { code: 'G1', title: 'Threshold Screening', status: 'fail', observed: 'Excluded by m_min / Shunts off', threshold: 'Active under default settings' },
+                { code: 'G2', title: 'Baseline Comparison', status: 'warn', observed: 'Present in default run', threshold: 'Reset (r) to restore' },
                 { code: 'G3', title: 'Parameter State', status: 'fail', observed: 'Filtered out', threshold: 'See Parameter Ribbon' },
                 { code: 'G4', title: 'Delta Status', status: 'warn', observed: 'Changed vs default', threshold: 'Modified call' }
               ],
@@ -4066,9 +3937,9 @@
       if (featNames && featNames.length === L && L <= 64) {
         return featNames.slice(0, L).map((fn, i) => ({ start: i, end: i + 1, label: fn, color: i % 2 === 0 ? '#E2E8F0' : '#DBEAFE' }));
       }
-      if (currentPack && currentPack.landmarks && currentPack.landmarks.length > 0) {
-        const lastEnd = Math.max(...currentPack.landmarks.map(x => x.end));
-        if (Math.abs(lastEnd - L) <= 12) return currentPack.landmarks;
+      if (currentDataset && currentDataset.landmarks && currentDataset.landmarks.length > 0) {
+        const lastEnd = Math.max(...currentDataset.landmarks.map(x => x.end));
+        if (Math.abs(lastEnd - L) <= 12) return currentDataset.landmarks;
       }
       return [{ start: 0, end: L, label: `Alignment 1 .. ${L}`, color: '#F1F5F9' }];
     }
@@ -4463,7 +4334,7 @@
       syncRibbonControlsFromActiveParams();
       computeStage0QA();
       await runFullInferencePipeline(false);
-      showToast('Parameters reset to pack defaults');
+      showToast('Parameters reset to defaults');
     };
 
     window.openStartingTreeModal = function() {
@@ -4477,7 +4348,7 @@
     };
 
     function buildCliCommand() {
-      const target = (currentPack && !customPack && currentPack.cliInput) ? currentPack.cliInput : (currentDatasetLabel || 'alignment.fasta');
+      const target = (currentDataset && !customDataset && currentDataset.cliInput) ? currentDataset.cliInput : (currentDatasetLabel || 'alignment.fasta');
       const parts = ['bushwhacker', target];
       const dm = activeParams.dataMode;
       if (dm === 'protein') parts.push('--protein');
@@ -4504,7 +4375,7 @@
       renderGuidedView();
       renderProMatrix();
       renderInspector();
-      renderCanvas();
+      fitTreeToScreen();
       updateTelemetryFooter();
     }
 
@@ -4517,26 +4388,24 @@
       const nSp = shunts.filter(s => s.mode === 'SPARSE').length;
       const nInt = shunts.filter(s => s.mode === 'INTERVAL').length;
       const unit = d.unitLabel || 'bp';
+      const effSites = (r.l_eff && r.l_eff > 0) ? r.l_eff : d.lEff;
 
-      document.getElementById('gPackBadge').textContent = currentPack ? currentPack.shortName : currentDatasetLabel;
+      document.getElementById('gDatasetBadge').textContent = (currentDataset && !customDataset) ? currentDataset.shortName : currentDatasetLabel;
       document.getElementById('gHeadlineVerdict').textContent =
         r.star_tree_nats > 0
-          ? `${r.n_taxa.toLocaleString()} taxa compressed ${r.star_tree_nats.toFixed(0)} → ${r.full_graph_nats.toFixed(0)} nats: ${r.n_internal_branches} splits, ${r.polytomy_nodes} polytomy hubs, ${shunts.length} shunt${shunts.length === 1 ? '' : 's'}.`
-          : `Topology Explorer: ${r.n_taxa.toLocaleString()} tips, ${r.n_internal_branches} internal branches, ${r.polytomy_nodes} polytomy hubs.`;
+          ? `${r.n_taxa.toLocaleString()} sequences resolved into ${r.n_internal_branches} supported splits, ${r.polytomy_nodes} polytomy hubs, and ${shunts.length} non-tree shunt${shunts.length === 1 ? '' : 's'}.`
+          : `${r.n_taxa.toLocaleString()} tips laid out with ${r.n_internal_branches} internal branches and ${r.polytomy_nodes} polytomy hubs.`;
+      document.getElementById('gSubVerdict').textContent = r.star_tree_nats > 0
+        ? `Compressed ${r.n_sites.toLocaleString()} ${unit} (${effSites.toFixed(1)} effective) from ${Math.round(r.star_tree_nats).toLocaleString()} to ${Math.round(r.full_graph_nats).toLocaleString()} nats — keeping only clades whose data savings pay for the branch.`
+        : `Loaded pure Newick topology directly for visual exploration and subtree focus.`;
 
-      const effSites = (r.l_eff && r.l_eff > 0) ? r.l_eff : d.lEff;
-      document.getElementById('gKpiDims').textContent = d.nSites > 0 ? `${r.n_taxa.toLocaleString()} × ${r.n_sites.toLocaleString()}` : `${r.n_taxa.toLocaleString()} tips`;
-      document.getElementById('gKpiDimsSub').textContent = `${(r.alphabet_mode || d.effectiveMode).toUpperCase()} · ${d.format}`;
-      document.getElementById('gKpiLeff').textContent = d.nSites > 0 ? effSites.toFixed(1) : '—';
-      document.getElementById('gKpiLeffSub').textContent = d.nSites > 0 ? `${d.parsimonyInformativeCount.toLocaleString()} parsimony-inf.` : 'Newick topology';
-      document.getElementById('gKpiMdl').textContent = r.full_graph_nats > 0 ? `${Math.round(r.full_graph_nats).toLocaleString()} nats` : 'Newick';
-      document.getElementById('gKpiMdlSub').textContent = r.star_tree_nats > 0 ? `Saved +${Math.round(savings).toLocaleString()} (${pct}%)` : '—';
-      document.getElementById('gKpiTopo').textContent = `${r.n_internal_branches} / ${r.polytomy_nodes}`;
-      document.getElementById('gKpiTopoSub').textContent = `${r.n_internal_branches} binary · ${r.polytomy_nodes} hubs`;
-      document.getElementById('gKpiShunts').textContent = String(shunts.length);
-      document.getElementById('gKpiShuntsSub').textContent = shunts.length > 0 ? `${nSp} SPARSE · ${nInt} INTERVAL` : 'Strictly clonal tree';
+      document.getElementById('gStatComp').textContent = r.star_tree_nats > 0 ? `${pct}% smaller` : 'Topology';
+      document.getElementById('gStatCompSub').textContent = r.star_tree_nats > 0 ? `(${Math.round(r.star_tree_nats).toLocaleString()} → ${Math.round(r.full_graph_nats).toLocaleString()} nats)` : `${r.n_taxa.toLocaleString()} tips`;
+      document.getElementById('gStatTopo').textContent = `${r.n_internal_branches} splits · ${r.polytomy_nodes} polytomies`;
+      document.getElementById('gStatShunt').textContent = shunts.length > 0 ? `${shunts.length} ${nInt > 0 && nSp === 0 ? 'horizontal transfer' : (nSp > 0 && nInt === 0 ? 'convergent shunt' : 'shunt')}${shunts.length === 1 ? '' : 's'}` : '0 shunts (tree-like)';
+      document.getElementById('gStatShuntSub').textContent = shunts.length > 0 ? `(+${shunts[0].net_mdl_gain_nats.toFixed(2)} nats, P=${(shunts[0].posterior_prob * 100).toFixed(1)}%)` : '';
 
-      // QA Card
+      // Accordion 1: QA
       const highGap = d.taxaRecords.filter(x => x.isHighGap).length;
       const dups = d.taxaRecords.filter(x => x.duplicateOf).length;
       const qaBadge = document.getElementById('gQaBadge');
@@ -4546,7 +4415,6 @@
         ? `Admitted ${r.n_taxa} of ${d.nTaxa} sequences (${r.n_sites.toLocaleString()} ${unit}; ${dups} duplicate${dups === 1 ? '' : 's'}, ${highGap} high-missing). Dual-entropy site weighting yields L_eff = ${effSites.toFixed(1)} effective columns against a Star-Tree null of ${Math.round(r.star_tree_nats || d.starNats).toLocaleString()} nats.`
         : `Pure Newick input parsed directly (${r.n_taxa} tips, no raw alignment uploaded).`;
 
-      // Horizon SVG inside Card 1
       const hz = document.getElementById('gQaHorizonSvg');
       if (hz && d.nSites > 0) {
         const W = 540, H = 54, nB = Math.min(180, d.nSites), maxH = Math.log(Math.max(2, d.kStates));
@@ -4568,14 +4436,7 @@
         }).join('');
       }
 
-      // Tree Card
-      const trBadge = document.getElementById('gTreeBadge');
-      trBadge.className = `status-badge ${r.polytomy_nodes > 0 ? 'warn' : 'pass'}`;
-      trBadge.textContent = `${r.n_internal_branches} SPLITS · ${r.polytomy_nodes} HUBS`;
-      document.getElementById('gTreeNarrative').textContent =
-        `Out of ${r.max_binary_internal_branches} possible binary stems, ${r.n_internal_branches} splits strictly repaid their topological + combinadic mutation header cost (max hub degree d = ${r.max_polytomy_degree || 3}), while zero-evidence short branches were deterministically collapsed into polytomies.`;
-
-      // Shunts Card
+      // Accordion 2: Shunts
       const shBadge = document.getElementById('gShuntBadge');
       shBadge.className = `status-badge ${shunts.length > 0 ? 'sparse' : 'pass'}`;
       shBadge.textContent = shunts.length > 0 ? `${shunts.length} SHUNT${shunts.length > 1 ? 'S' : ''} ✓` : '0 SHUNTS (CLONAL) ✓';
@@ -4629,67 +4490,60 @@
       document.getElementById('telCohort').textContent = `${r.n_taxa.toLocaleString()} × ${(r.n_sites || 0).toLocaleString()} ${d?.unitLabel || 'sites'} (L_eff=${(r.l_eff || 0).toFixed(1)})`;
       document.getElementById('telMdl').textContent = r.star_tree_nats > 0 ? `Star ${Math.round(r.star_tree_nats).toLocaleString()} → Graph ${Math.round(r.full_graph_nats).toLocaleString()} nats` : 'Topology Newick';
       document.getElementById('telPerf').textContent = `${Math.round(lastComputeMs)} ms (${sitesPerSec.toLocaleString()} cells/s)`;
-      document.getElementById('telPackVer').textContent = `${currentPack ? currentPack.shortName : currentDatasetLabel} · ${currentPack?.version || 'Custom'}`;
+      document.getElementById('telDataset').textContent = currentDatasetLabel || 'custom';
     }
 
     // =========================================================================
-    // 11. PACK SWITCHING, UPLOADS, LIVE NCBI STREAM & MODALS
+    // 11. EXAMPLE DATASET SWITCHING, UPLOADS, LIVE NCBI STREAM & MODALS
     // =========================================================================
-    function renderPackSelectors() {
-      const sel = document.getElementById('packSelect');
+    function renderDatasetSelector() {
+      const sel = document.getElementById('datasetSelect');
       if (sel) {
-        sel.innerHTML = SPECIFICATION_PACKS.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.title)}</option>`).join('');
-      }
-      const chips = document.getElementById('guidedPackChips');
-      if (chips) {
-        chips.innerHTML = SPECIFICATION_PACKS.map(p =>
-          `<button class="pack-chip ${currentPack && currentPack.id === p.id && !customPack ? 'active' : ''}" data-pack="${escapeHtml(p.id)}" onclick="loadSpecificationPack('${escapeHtml(p.id)}')">${escapeHtml(p.shortName)}</button>`
-        ).join('');
+        sel.innerHTML = EXAMPLE_DATASETS.map(d => `<option value="${escapeHtml(d.id)}">${escapeHtml(d.title)}</option>`).join('');
       }
     }
 
-    window.onPackSelectChange = function() {
-      const id = document.getElementById('packSelect')?.value;
-      if (id && id !== '__custom__') loadSpecificationPack(id);
+    window.onDatasetSelectChange = function() {
+      const id = document.getElementById('datasetSelect')?.value;
+      if (id && id !== '__custom__') loadExampleDataset(id);
     };
 
-    window.loadSpecificationPack = async function(packId) {
-      const pack = SPECIFICATION_PACKS.find(p => p.id === packId) || SPECIFICATION_PACKS[0];
-      currentPack = pack;
-      customPack = null;
-      const sel = document.getElementById('packSelect');
-      if (sel) sel.value = pack.id;
-      document.querySelectorAll('#guidedPackChips .pack-chip').forEach(c => c.classList.toggle('active', c.getAttribute('data-pack') === pack.id));
+    window.loadExampleDataset = async function(datasetId) {
+      const ds = EXAMPLE_DATASETS.find(d => d.id === datasetId) || EXAMPLE_DATASETS[0];
+      currentDataset = ds;
+      customDataset = null;
+      const sel = document.getElementById('datasetSelect');
+      if (sel) sel.value = ds.id;
 
-      defaultParams = { ...pack.defaultParams, startingNewick: '' };
-      activeParams = { ...pack.defaultParams, startingNewick: '' };
+      defaultParams = { ...ds.defaultParams, startingNewick: '' };
+      activeParams = { ...ds.defaultParams, startingNewick: '' };
       document.querySelectorAll('#presetPills .preset-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-preset') === 'balanced'));
       syncRibbonControlsFromActiveParams();
 
       try {
         document.getElementById('wasmLed').className = 'status-dot busy';
-        if (pack.file) {
-          currentDatasetLabel = pack.file.split('/').pop();
-          const resp = await fetch(pack.file);
+        if (ds.file) {
+          currentDatasetLabel = ds.file.split('/').pop();
+          const resp = await fetch(ds.file);
           if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
           currentRawText = await resp.text();
-        } else if (pack.generator === 'hgt') {
+        } else if (ds.generator === 'hgt') {
           currentDatasetLabel = 'hgt_mosaic_24x900.fasta';
           currentRawText = generateHgtMosaicFasta(24, 900);
-        } else if (pack.generator === 'polytomy') {
+        } else if (ds.generator === 'polytomy') {
           currentDatasetLabel = 'polytomy_64x600.fasta';
           currentRawText = generatePolytomyBenchmarkFasta(64, 600);
-        } else if (pack.generator === 'large512') {
+        } else if (ds.generator === 'large512') {
           currentDatasetLabel = 'simd_512x800.fasta';
           currentRawText = generatePolytomyBenchmarkFasta(512, 800);
-        } else if (pack.generator === 'newick2048') {
+        } else if (ds.generator === 'newick2048') {
           currentDatasetLabel = 'global_2048.nwk';
           currentRawText = generateSyntheticNewick(2048);
         }
         await loadRawCohortText(currentRawText, currentDatasetLabel);
       } catch (err) {
         document.getElementById('wasmLed').className = 'status-dot error';
-        showToast('Pack load failed: ' + (err?.message || err));
+        showToast('Dataset load failed: ' + (err?.message || err));
       }
     };
 
@@ -4705,8 +4559,8 @@
       await runFullInferencePipeline(true);
     }
 
-    function setCustomPackSelect(label) {
-      const sel = document.getElementById('packSelect');
+    function setCustomDatasetSelect(label) {
+      const sel = document.getElementById('datasetSelect');
       if (!sel) return;
       let opt = sel.querySelector('option[value="__custom__"]');
       if (!opt) { opt = document.createElement('option'); opt.value = '__custom__'; sel.prepend(opt); }
@@ -4722,19 +4576,19 @@
           const buf = await file.arrayBuffer();
           const res = await callWorker({ type: 'decompress_bwz', bytes: new Uint8Array(buf) });
           const dec = JSON.parse(res.jsonStr);
-          setCustomPackSelect(file.name);
-          customPack = { shortName: file.name, version: 'bwz' };
+          setCustomDatasetSelect(file.name);
+          customDataset = { shortName: file.name };
           await loadRawCohortText(dec.fasta, file.name.replace(/\.bwz$/i, '.fasta'));
         } catch (err) { showToast('Decompress failed: ' + (err?.message || err)); }
         return;
       }
       const txt = await file.text();
-      if (file.name.toLowerCase().endsWith('.pack.json') || (file.name.toLowerCase().endsWith('.json') && /^\s*\{/.test(txt))) {
+      if (file.name.toLowerCase().endsWith('.json') && /^\s*\{/.test(txt)) {
         try {
           const j = JSON.parse(txt);
           if (j && j.fastaText) {
-            customPack = j;
-            setCustomPackSelect(j.title || file.name);
+            customDataset = j;
+            setCustomDatasetSelect(j.title || file.name);
             if (j.defaultParams) { defaultParams = { ...j.defaultParams, startingNewick: '' }; activeParams = { ...defaultParams }; syncRibbonControlsFromActiveParams(); }
             await loadRawCohortText(j.fastaText, file.name);
             return;
@@ -4746,8 +4600,8 @@
           }
         } catch (_) {}
       }
-      customPack = { shortName: file.name, version: 'Upload' };
-      setCustomPackSelect(file.name);
+      customDataset = { shortName: file.name };
+      setCustomDatasetSelect(file.name);
       defaultParams = { dataMode: 'auto', codingMode: 'auto', detectShunts: true, minShuntSites: 2, noMultPen: false, empiricalAlpha: false, pLocalFloor: 0.50, dedupTaxa: false, startingNewick: '' };
       activeParams = { ...defaultParams };
       syncRibbonControlsFromActiveParams();
@@ -4766,8 +4620,8 @@
       const lbl = (document.getElementById('pasteLabelInput')?.value || 'pasted.fasta').trim();
       if (!txt) return;
       closeModal('pasteModal');
-      customPack = { shortName: lbl, version: 'Pasted' };
-      setCustomPackSelect(lbl);
+      customDataset = { shortName: lbl };
+      setCustomDatasetSelect(lbl);
       await loadRawCohortText(txt, lbl);
     };
 
@@ -4997,18 +4851,18 @@
 
     // Expose safe debug hooks for Playwright verification while keeping closure encapsulation
     window.__bwState = () => ({
-      uiMode, wasmReady, pack: currentPack?.id, nTaxa: currentResult?.n_taxa, nSites: currentResult?.n_sites,
+      uiMode, wasmReady, dataset: currentDataset?.id, nTaxa: currentResult?.n_taxa, nSites: currentResult?.n_sites,
       shunts: currentResult?.shunts, deltaChanged: allMatrixRecords.filter(x => x.isChanged).length,
       selectedRecordId, cli: buildCliCommand()
     });
 
     (async function boot() {
-      renderPackSelectors();
+      renderDatasetSelector();
       setupTreeCanvasEvents();
       setupTracksScrubberEvents();
       setUiMode(detectInitialUiMode(), false);
       await initEngineAndWorker();
-      await loadSpecificationPack('prestin');
+      await loadExampleDataset('prestin');
     })();
   </script>
 </body>
