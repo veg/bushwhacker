@@ -10007,17 +10007,34 @@ pub fn discrete_matrix_to_symbol_seqs(cm: &discrete::DiscreteCharacterMatrix) ->
 }
 
 /// Induce an MDL phylogenetic graph across any supported data modality (`auto`, `nucleotide`,
-/// `protein`, `translate`, `binary`, `discrete`, `ordered`) from FASTA, PHYLIP, NEXUS, CSV, or TSV
-/// text and return a JSON-serialized `BushwhackerResult` enriched with alphabet metadata.
-pub fn infer_any_alignment_json(
+/// `protein`, `translate`, `binary`, `discrete`, `ordered`) with full CLI-flag parity
+/// (`no_mult_pen`, `empirical_alpha`, and optional `starting_newick` contraction).
+pub fn infer_any_alignment_with_options_json(
     input_text: &str,
     data_mode: &str,
     coding_aware: bool,
     detect_shunts: bool,
     min_shunt_sites: usize,
+    no_mult_pen: bool,
+    empirical_alpha: bool,
+    starting_newick: Option<&str>,
 ) -> Result<String, String> {
     let mode_norm = data_mode.trim().to_ascii_lowercase();
-    let engine = BushwhackerEngine::new(coding_aware, detect_shunts, min_shunt_sites.max(1));
+    let mut engine = BushwhackerEngine::new(coding_aware, detect_shunts, min_shunt_sites.max(1));
+    engine.no_mult_pen = no_mult_pen;
+    engine.empirical_alpha = empirical_alpha;
+    let start_opt: Option<(&str, bool)> = starting_newick
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(|s| (s, false));
+
+    let run_nuc = |names: &[String], seqs: &[String]| -> Result<BushwhackerResult, String> {
+        if let Some((nwk, expand)) = start_opt {
+            engine.infer_with_starting_newick(names, seqs, nwk, expand)
+        } else {
+            engine.infer(names, seqs)
+        }
+    };
 
     let (res, alphabet_mode, k_states, feature_names): (
         BushwhackerResult,
@@ -10027,11 +10044,17 @@ pub fn infer_any_alignment_json(
     ) = match mode_norm.as_str() {
         "binary" => {
             let cm = discrete::parse_discrete_str(input_text)?;
+            if cm.k_states > 2 {
+                return Err(format!(
+                    "--binary expects at most 2 states (0/1), found K={}",
+                    cm.k_states
+                ));
+            }
             let r = discrete::infer_discrete_mdl(
                 &engine,
                 &cm,
                 discrete::DiscreteMode::Unordered,
-                None,
+                start_opt,
             )?;
             (r, "binary", cm.k_states.max(2), cm.feature_names)
         }
@@ -10041,7 +10064,7 @@ pub fn infer_any_alignment_json(
                 &engine,
                 &cm,
                 discrete::DiscreteMode::Unordered,
-                None,
+                start_opt,
             )?;
             (r, "discrete", cm.k_states, cm.feature_names)
         }
@@ -10051,28 +10074,28 @@ pub fn infer_any_alignment_json(
                 &engine,
                 &cm,
                 discrete::DiscreteMode::Ordered,
-                None,
+                start_opt,
             )?;
             (r, "ordered", cm.k_states, cm.feature_names)
         }
         "protein" | "aa" => {
             let (names, seqs) = parse_alignment_str(input_text)?;
-            let r = protein::infer_protein_mdl(&engine, &names, &seqs, None)?;
+            let r = protein::infer_protein_mdl(&engine, &names, &seqs, start_opt)?;
             (r, "protein", 20, Vec::new())
         }
         "translate" | "codon_translate" => {
             let (names, seqs) = parse_alignment_str(input_text)?;
             let r = if protein::is_protein_alignment(&seqs) {
-                protein::infer_protein_mdl(&engine, &names, &seqs, None)?
+                protein::infer_protein_mdl(&engine, &names, &seqs, start_opt)?
             } else {
                 let aa_seqs = protein::translate_coding_alignment(&seqs)?;
-                protein::infer_protein_mdl(&engine, &names, &aa_seqs, None)?
+                protein::infer_protein_mdl(&engine, &names, &aa_seqs, start_opt)?
             };
             (r, "translate", 20, Vec::new())
         }
         "nucleotide" | "dna" | "rna" => {
             let (names, seqs) = parse_alignment_str(input_text)?;
-            let r = engine.infer(&names, &seqs)?;
+            let r = run_nuc(&names, &seqs)?;
             (r, "nucleotide", 4, Vec::new())
         }
         _ => {
@@ -10084,7 +10107,7 @@ pub fn infer_any_alignment_json(
                         &engine,
                         &cm,
                         discrete::DiscreteMode::Unordered,
-                        None,
+                        start_opt,
                     )?;
                     (r, "binary", 2, cm.feature_names)
                 } else {
@@ -10092,7 +10115,7 @@ pub fn infer_any_alignment_json(
                         &engine,
                         &cm,
                         discrete::DiscreteMode::Ordered,
-                        None,
+                        start_opt,
                     )?;
                     (r, "ordered", cm.k_states, cm.feature_names)
                 }
@@ -10105,7 +10128,7 @@ pub fn infer_any_alignment_json(
                             &engine,
                             &cm,
                             discrete::DiscreteMode::Unordered,
-                            None,
+                            start_opt,
                         )?;
                         (r, "binary", 2, cm.feature_names)
                     }
@@ -10115,16 +10138,16 @@ pub fn infer_any_alignment_json(
                             &engine,
                             &cm,
                             discrete::DiscreteMode::Ordered,
-                            None,
+                            start_opt,
                         )?;
                         (r, "ordered", cm.k_states, cm.feature_names)
                     }
                     "protein" => {
-                        let r = protein::infer_protein_mdl(&engine, &names, &seqs, None)?;
+                        let r = protein::infer_protein_mdl(&engine, &names, &seqs, start_opt)?;
                         (r, "protein", 20, Vec::new())
                     }
                     _ => {
-                        let r = engine.infer(&names, &seqs)?;
+                        let r = run_nuc(&names, &seqs)?;
                         (r, "nucleotide", 4, Vec::new())
                     }
                 }
@@ -10150,6 +10173,28 @@ pub fn infer_any_alignment_json(
         }
     }
     serde_json::to_string(&val).map_err(|e| e.to_string())
+}
+
+/// Induce an MDL phylogenetic graph across any supported data modality (`auto`, `nucleotide`,
+/// `protein`, `translate`, `binary`, `discrete`, `ordered`) from FASTA, PHYLIP, NEXUS, CSV, or TSV
+/// text and return a JSON-serialized `BushwhackerResult` enriched with alphabet metadata.
+pub fn infer_any_alignment_json(
+    input_text: &str,
+    data_mode: &str,
+    coding_aware: bool,
+    detect_shunts: bool,
+    min_shunt_sites: usize,
+) -> Result<String, String> {
+    infer_any_alignment_with_options_json(
+        input_text,
+        data_mode,
+        coding_aware,
+        detect_shunts,
+        min_shunt_sites,
+        false,
+        false,
+        None,
+    )
 }
 
 /// Compress any supported alignment or discrete/binary character matrix (`input_text`) and its
@@ -10206,6 +10251,37 @@ impl WasmBushwhacker {
             coding_aware,
             detect_shunts,
             min_shunt_sites,
+        )
+        .map_err(|e| JsValue::from_str(&e))
+    }
+
+    /// Induce an MDL phylogenetic graph with full CLI-flag parity (`no_mult_pen`,
+    /// `empirical_alpha`, and optional `starting_newick` for `--contract-tree`).
+    pub fn infer_alignment_with_options(
+        &self,
+        input_text: &str,
+        data_mode: &str,
+        coding_aware: bool,
+        detect_shunts: bool,
+        min_shunt_sites: usize,
+        no_mult_pen: bool,
+        empirical_alpha: bool,
+        starting_newick: &str,
+    ) -> Result<String, JsValue> {
+        let start_arg = if starting_newick.trim().is_empty() {
+            None
+        } else {
+            Some(starting_newick)
+        };
+        infer_any_alignment_with_options_json(
+            input_text,
+            data_mode,
+            coding_aware,
+            detect_shunts,
+            min_shunt_sites,
+            no_mult_pen,
+            empirical_alpha,
+            start_arg,
         )
         .map_err(|e| JsValue::from_str(&e))
     }
@@ -11086,5 +11162,69 @@ Clone_B2,0,0,0,1,1,1,1,?
             decompress_alignment_from_bwz(&bwz_bytes).expect("Discrete .bwz should round-trip");
         assert_eq!(rt_names, cm.names);
         assert_eq!(rt_seqs, sym_seqs);
+    }
+
+    #[test]
+    fn test_infer_any_alignment_with_options_json_flags_and_starting_tree() {
+        // 6 taxa with one clear bipartition (A1,A2,A3) vs (B1,B2,B3) and neutral noise
+        let s_a = vec![b'A'; 180];
+        let mut s_b = vec![b'A'; 180];
+        for i in 0..18 {
+            s_b[i] = b'G';
+        }
+        let seq_a = String::from_utf8(s_a.clone()).unwrap();
+        let mut s_a2 = s_a.clone();
+        s_a2[60] = b'C';
+        let mut s_a3 = s_a;
+        s_a3[70] = b'T';
+        let seq_b = String::from_utf8(s_b.clone()).unwrap();
+        let mut s_b2 = s_b.clone();
+        s_b2[80] = b'C';
+        let mut s_b3 = s_b;
+        s_b3[90] = b'T';
+
+        let fasta = format!(
+            ">A1\n{seq_a}\n>A2\n{}\n>A3\n{}\n>B1\n{seq_b}\n>B2\n{}\n>B3\n{}\n",
+            String::from_utf8(s_a2).unwrap(),
+            String::from_utf8(s_a3).unwrap(),
+            String::from_utf8(s_b2).unwrap(),
+            String::from_utf8(s_b3).unwrap(),
+        );
+
+        let j_default = infer_any_alignment_json(&fasta, "nucleotide", true, false, 4).unwrap();
+        let j_opts = infer_any_alignment_with_options_json(
+            &fasta,
+            "nucleotide",
+            true,
+            false,
+            4,
+            true,
+            true,
+            None,
+        )
+        .unwrap();
+        let v_def: serde_json::Value = serde_json::from_str(&j_default).unwrap();
+        let v_opt: serde_json::Value = serde_json::from_str(&j_opts).unwrap();
+        assert_eq!(v_def["alphabet_mode"], "nucleotide");
+        assert_eq!(v_opt["alphabet_mode"], "nucleotide");
+        assert!(v_opt["backbone_tree_nats"].as_f64().unwrap() > 0.0);
+
+        // Starting Newick with an unsupported arbitrary sub-split ((A1,A2),A3,(B1,(B2,B3)));
+        // BUSHWHACKER must contract unsupported internal splits on (D, T_in)
+        let bad_nwk = "((A1:0.01,A2:0.01):0.01,A3:0.01,(B1:0.01,(B2:0.01,B3:0.01):0.01):0.01);";
+        let j_contract = infer_any_alignment_with_options_json(
+            &fasta,
+            "nucleotide",
+            false,
+            false,
+            4,
+            false,
+            false,
+            Some(bad_nwk),
+        )
+        .unwrap();
+        let v_contract: serde_json::Value = serde_json::from_str(&j_contract).unwrap();
+        assert_eq!(v_contract["n_taxa"], 6);
+        assert!(v_contract["polytomy_nodes"].as_u64().unwrap() >= 1);
     }
 }

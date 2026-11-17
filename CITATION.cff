@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this replication package or Bushwhacker software, please cite this work."
 title: "Evolutionary history from genomes to single cells by lossless compression (Replication Package)"
 version: "0.1.0"
-date-released: "2026-11-12"
+date-released: "2026-11-17"
 url: "https://github.com/veg/bushwhacker"
 license: "MIT"
 authors:

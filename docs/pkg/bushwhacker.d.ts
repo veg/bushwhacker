@@ -19,6 +19,11 @@ export class WasmBushwhacker {
      */
     infer_alignment(input_text: string, data_mode: string, coding_aware: boolean, detect_shunts: boolean, min_shunt_sites: number): string;
     /**
+     * Induce an MDL phylogenetic graph with full CLI-flag parity (`no_mult_pen`,
+     * `empirical_alpha`, and optional `starting_newick` for `--contract-tree`).
+     */
+    infer_alignment_with_options(input_text: string, data_mode: string, coding_aware: boolean, detect_shunts: boolean, min_shunt_sites: number, no_mult_pen: boolean, empirical_alpha: boolean, starting_newick: string): string;
+    /**
      * Backwards-compatible entrypoint that auto-detects Nucleotide, Protein, Binary (`0/1`),
      * or Discrete/Ordered CSV/TSV matrices.
      */
@@ -34,6 +39,7 @@ export interface InitOutput {
     readonly wasmbushwhacker_compress_bwz: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly wasmbushwhacker_decompress_bwz: (a: number, b: number, c: number) => [number, number, number, number];
     readonly wasmbushwhacker_infer_alignment: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number, number];
+    readonly wasmbushwhacker_infer_alignment_with_options: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number) => [number, number, number, number];
     readonly wasmbushwhacker_infer_fasta: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly wasmbushwhacker_new: () => number;
     readonly __wbindgen_externrefs: WebAssembly.Table;

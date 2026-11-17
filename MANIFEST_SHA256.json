@@ -1,7 +1,7 @@
 {
   "package": "bushwhacker_science_zenodo_v1.0",
   "total_files": 527,
-  "total_bytes": 92046289,
+  "total_bytes": 92110598,
   "files": {
     ".github/workflows/publish-python.yml": {
       "bytes": 3219,
@@ -17,7 +17,7 @@
     },
     "CITATION.cff": {
       "bytes": 943,
-      "sha256": "f42d8ab086d248d385f686664f05a1b64995708f7923d635f79f7c0a73ffd299"
+      "sha256": "0365e506237dfab4266a25cce178b9b782f8239fda97837b34fd837d5c823fd8"
     },
     "Cargo.lock": {
       "bytes": 5748,
@@ -568,36 +568,36 @@
       "sha256": "0d4742379db2222538bf80a593d22a0390beb3e73a2d61b6efb2264e71558fc5"
     },
     "docs/index.html": {
-      "bytes": 316014,
-      "sha256": "fdf1b099c9c955e3c777c2a3fd92e69033f325b49a1ccc8044e524ee8aa49ba2"
+      "bytes": 250052,
+      "sha256": "ab4b24753acbd1be47fdb83ca49f8c24a4292617e68b67095e5288293b6b7d55"
     },
     "docs/pkg/README.md": {
-      "bytes": 19273,
-      "sha256": "b9d9da8da8ba7d2b8f2fa31f0a4ea5c6182c600da09ca2145352693d8cdfd3ef"
+      "bytes": 18846,
+      "sha256": "bccb111ebcc869e153deb92d2e6390b61970c2550fb909bda05beadbe4449ef6"
     },
     "docs/pkg/bushwhacker.d.ts": {
-      "bytes": 3299,
-      "sha256": "12955c86806a3c5aaf5921ce0d4b057630b94e33bccdfe3daff90610570e88cf"
+      "bytes": 3933,
+      "sha256": "74d21a399c5b277b56284ba0a54f88e992061f50c9bb679f3e35a0de6629083e"
     },
     "docs/pkg/bushwhacker.js": {
-      "bytes": 13163,
-      "sha256": "eec0fe15e48cfdd71636693c51c7a95966e1fce7fb4257523eb9a9f8f8f19bdc"
+      "bytes": 15435,
+      "sha256": "02b6ee8c6f747216d5b58079ee8fe47ae75cc1d2295a8bb9628ad84eec7aaf7c"
     },
     "docs/pkg/bushwhacker_bg.wasm": {
-      "bytes": 1820184,
-      "sha256": "194f5dff0e7e410be8893712690158140d1c339318e7a844a8cd0a4a3c4d1c9f"
+      "bytes": 1941670,
+      "sha256": "a4559976b22b5e8dde5d8d7d7c42a57bdd364b0b106b63be0ca604f947de8649"
     },
     "docs/pkg/bushwhacker_bg.wasm.d.ts": {
-      "bytes": 1161,
-      "sha256": "c7ebbf0e2d77a768b88175d2cd389ba992341d8c289711a492c168fd4d660c84"
+      "bytes": 1390,
+      "sha256": "d6cf82255767292866c4658703559986c0c019d2d5f61d313511786fb2664b95"
     },
     "docs/pkg/package.json": {
       "bytes": 593,
       "sha256": "4dbb1c693d644caefc49b84408a96b88cc8f80b5c2151e043af9dbcfc7be155e"
     },
     "docs/worker.js": {
-      "bytes": 2100,
-      "sha256": "3547800595509b1810f4f9f799926eb9c3e04c1005131de63f061c64cdb4dfa4"
+      "bytes": 3315,
+      "sha256": "153e7981376b784253783532a99b3abaa6f8277b6a4eac73db46a76b5108b528"
     },
     "paper/fig1_synthetic_benchmarks.pdf": {
       "bytes": 41559,
@@ -2096,8 +2096,8 @@
       "sha256": "c5c1c6f1a7c534bd53961b2fb4d14389d5739f793abdf8e52d14132df29d05e6"
     },
     "src/lib.rs": {
-      "bytes": 426554,
-      "sha256": "0b482bf35a7e047fb2eab5d0a5e8261e8924f460bbccce82d1c171b9ca2143b6"
+      "bytes": 431416,
+      "sha256": "79decea465d7a740e51b3f6b281fdaa1f52a2041a6d88fd64306dfb5d54e0f2e"
     },
     "src/main.rs": {
       "bytes": 35230,

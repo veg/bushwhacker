@@ -3,6 +3,8 @@ import init, { WasmBushwhacker } from './pkg/bushwhacker.js';
 
 let engine = null;
 let ready = false;
+let cachedFastaText = '';
+let cachedCohortKey = '';
 
 async function ensureInitialized() {
   if (ready && engine) return;
@@ -23,31 +25,63 @@ self.onmessage = async (ev) => {
 
     await ensureInitialized();
 
+    if (type === 'set_cohort') {
+      cachedFastaText = String(msg.fastaText || '');
+      cachedCohortKey = String(msg.cohortKey || '');
+      self.postMessage({ id, type: 'cohort_cached', cohortKey: cachedCohortKey, bytes: cachedFastaText.length });
+      return;
+    }
+
     if (type === 'infer_alignment' || type === 'infer_fasta') {
       const t0 = performance.now();
       const mode = String(msg.dataMode || 'auto');
-      const jsonStr = typeof engine.infer_alignment === 'function'
-        ? engine.infer_alignment(
-            String(msg.fastaText || ''),
-            mode,
-            Boolean(msg.codingAware),
-            Boolean(msg.detectShunts),
-            Number(msg.minShuntSites || 4)
-          )
-        : engine.infer_fasta(
-            String(msg.fastaText || ''),
-            Boolean(msg.codingAware),
-            Boolean(msg.detectShunts),
-            Number(msg.minShuntSites || 4)
-          );
+      if (typeof msg.fastaText === 'string' && msg.fastaText.length > 0) {
+        cachedFastaText = msg.fastaText;
+        if (msg.cohortKey) cachedCohortKey = String(msg.cohortKey);
+      }
+      const inputText = (typeof msg.fastaText === 'string' && msg.fastaText.length > 0)
+        ? msg.fastaText
+        : cachedFastaText;
+      const startNwk = String(msg.startingNewick || '');
+      let jsonStr;
+      if (typeof engine.infer_alignment_with_options === 'function') {
+        jsonStr = engine.infer_alignment_with_options(
+          inputText,
+          mode,
+          Boolean(msg.codingAware),
+          Boolean(msg.detectShunts),
+          Number(msg.minShuntSites || 4),
+          Boolean(msg.noMultPen),
+          Boolean(msg.empiricalAlpha),
+          startNwk
+        );
+      } else if (typeof engine.infer_alignment === 'function') {
+        jsonStr = engine.infer_alignment(
+          inputText,
+          mode,
+          Boolean(msg.codingAware),
+          Boolean(msg.detectShunts),
+          Number(msg.minShuntSites || 4)
+        );
+      } else {
+        jsonStr = engine.infer_fasta(
+          inputText,
+          Boolean(msg.codingAware),
+          Boolean(msg.detectShunts),
+          Number(msg.minShuntSites || 4)
+        );
+      }
       const wallMs = performance.now() - t0;
       self.postMessage({ id, type: 'infer_result', jsonStr, wallMs });
       return;
     }
 
     if (type === 'compress_bwz') {
+      const inputText = (typeof msg.fastaText === 'string' && msg.fastaText.length > 0)
+        ? msg.fastaText
+        : cachedFastaText;
       const bytes = engine.compress_bwz(
-        String(msg.fastaText || ''),
+        inputText,
         String(msg.resultJson || '')
       );
       self.postMessage({ id, type: 'compress_bwz_result', bytes }, [bytes.buffer]);

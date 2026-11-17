@@ -106,6 +106,56 @@ export class WasmBushwhacker {
         }
     }
     /**
+     * Induce an MDL phylogenetic graph with full CLI-flag parity (`no_mult_pen`,
+     * `empirical_alpha`, and optional `starting_newick` for `--contract-tree`).
+     * @param {string} input_text
+     * @param {string} data_mode
+     * @param {boolean} coding_aware
+     * @param {boolean} detect_shunts
+     * @param {number} min_shunt_sites
+     * @param {boolean} no_mult_pen
+     * @param {boolean} empirical_alpha
+     * @param {string} starting_newick
+     * @returns {string}
+     */
+    infer_alignment_with_options(input_text, data_mode, coding_aware, detect_shunts, min_shunt_sites, no_mult_pen, empirical_alpha, starting_newick) {
+        let deferred10_0;
+        let deferred10_1;
+        try {
+            const val4 = +coding_aware;
+            const val5 = +detect_shunts;
+            const val6 = +min_shunt_sites;
+            const val7 = +no_mult_pen;
+            const val8 = +empirical_alpha;
+            let ptr0, len0, ptr1, len1, ptr2, len2;
+            try {
+                ptr0 = passStringToWasm0(input_text, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+                len0 = WASM_VECTOR_LEN;
+                ptr1 = passStringToWasm0(data_mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+                len1 = WASM_VECTOR_LEN;
+                ptr2 = passStringToWasm0(starting_newick, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+                len2 = WASM_VECTOR_LEN;
+            } catch (e) {
+                if (ptr2) { wasm.__wbindgen_free(ptr2, len2 * 1, 1); }
+                if (ptr1) { wasm.__wbindgen_free(ptr1, len1 * 1, 1); }
+                if (ptr0) { wasm.__wbindgen_free(ptr0, len0 * 1, 1); }
+                throw e;
+            }
+            const ret = wasm.wasmbushwhacker_infer_alignment_with_options(this.__wbg_ptr, ptr0, len0, ptr1, len1, val4, val5, val6, val7, val8, ptr2, len2);
+            var ptr9 = ret[0];
+            var len9 = ret[1];
+            if (ret[3]) {
+                ptr9 = 0; len9 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred10_0 = ptr9;
+            deferred10_1 = len9;
+            return getStringFromWasm0(ptr9, len9);
+        } finally {
+            wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
+        }
+    }
+    /**
      * Backwards-compatible entrypoint that auto-detects Nucleotide, Protein, Binary (`0/1`),
      * or Discrete/Ordered CSV/TSV matrices.
      * @param {string} fasta_text
