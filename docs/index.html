@@ -436,12 +436,35 @@
     }
     .toggle-chip input { accent-color: var(--accent-primary); cursor: pointer; }
 
-    /* In Guided mode, hide advanced parameter ribbon & busy pro controls unless opened */
-    body[data-mode="guided"] .pro-top-btn { display: none; }
-    body[data-mode="guided"] .pro-tree-ctrl { display: none; }
+    /* In Guided mode, hide advanced parameter ribbon & footer shortcut hints unless opened */
     body[data-mode="guided"] .pro-only-footer { display: none; }
     body[data-mode="guided"]:not(.guided-params-open) .param-ribbon { display: none; }
     body[data-mode="pro"] #btnToggleAdvParams { display: none; }
+
+    /* Window-wide drag-and-drop overlay */
+    .window-drop-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(239, 246, 255, 0.88);
+      backdrop-filter: blur(3px);
+      border: 3px dashed var(--accent-primary);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      pointer-events: none;
+    }
+    .window-drop-overlay.active { display: flex; }
+    .window-drop-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--accent-primary);
+      border-radius: 12px;
+      padding: 22px 28px;
+      box-shadow: 0 18px 40px rgba(29, 78, 216, 0.16);
+      text-align: center;
+      max-width: 520px;
+    }
 
     .delta-pill {
       display: none;
@@ -461,95 +484,131 @@
     .delta-pill.visible { display: inline-flex; }
 
     /* =================================================================== */
-    /* MODE A: GUIDED WORKSPACE (CALM PROGRESSIVE DISCLOSURE)              */
+    /* MODE A: GUIDED WORKSPACE (TREE CENTERPIECE ABOVE THE FOLD)          */
     /* =================================================================== */
     #guidedRoot {
       display: none;
-      max-width: 980px;
+      max-width: 1680px;
       width: 100%;
       margin: 0 auto;
-      padding: 24px 20px 44px;
+      padding: 10px 14px 28px;
       flex: 1 0 auto;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
     body[data-mode="guided"] #guidedRoot { display: flex; }
 
-    .guided-dropbar {
-      background: var(--bg-surface);
-      border: 1px dashed var(--border-strong);
-      border-radius: 10px;
-      padding: 12px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      transition: border-color 0.14s, background 0.14s;
-    }
-    .guided-dropbar.dragover {
-      border-color: var(--accent-primary);
-      background: var(--bg-active);
-    }
-
-    .guided-hero-card {
+    .guided-stage-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-hairline);
       border-radius: 10px;
       box-shadow: var(--shadow-sm);
       overflow: hidden;
-    }
-    .guided-hero-top {
-      padding: 18px 22px 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
     }
-    .guided-hero-head {
+    .guided-stage-bar {
+      padding: 8px 14px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-hairline);
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 10px;
       flex-wrap: wrap;
     }
-    .guided-stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-hairline);
-      font-size: 12.5px;
-      color: var(--text-secondary);
-    }
-    @media (max-width: 720px) {
-      .guided-stats-row { grid-template-columns: 1fr; gap: 10px; }
-    }
-    .guided-stat-item {
+    .guided-stage-left {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 0;
+      flex: 1 1 auto;
     }
-    .guided-stat-label {
-      font-size: 10.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
+    .guided-stage-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
     }
-    .guided-stat-val {
-      font-family: var(--font-mono);
-      font-size: 14px;
+    .guided-stage-title {
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--text-primary);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .guided-kpi-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-hairline);
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      white-space: nowrap;
       font-variant-numeric: tabular-nums;
+    }
+    .guided-kpi-pill strong {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .guided-kpi-pill.pass {
+      background: var(--pass-bg);
+      border-color: var(--pass-bd);
+      color: var(--pass-ink);
+    }
+    .guided-kpi-pill.pass strong { color: var(--pass-ink); }
+    .guided-kpi-pill.shunt {
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: transform 0.08s, box-shadow 0.12s;
+    }
+    .guided-kpi-pill.shunt:hover {
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+    }
+    .guided-kpi-pill.shunt.sparse {
+      background: var(--sparse-bg);
+      border-color: var(--sparse-bd);
+      color: var(--sparse-ink);
+    }
+    .guided-kpi-pill.shunt.sparse strong { color: var(--sparse-ink); }
+    .guided-kpi-pill.shunt.ref {
+      background: var(--ref-bg);
+      border-color: var(--ref-bd);
+      color: var(--ref-ink);
+    }
+    .guided-kpi-pill.shunt.ref strong { color: var(--ref-ink); }
+    @media (max-width: 1180px) {
+      .guided-stage-bar { padding: 7px 10px; gap: 6px; }
+      .guided-stage-left { gap: 5px; }
+      .guided-kpi-pill { padding: 0 7px; font-size: 11px; height: 22px; }
+      #gStatCompSub { display: none; }
     }
 
     .guided-tree-host {
-      border-top: 1px solid var(--border-hairline);
-      height: 430px;
+      height: clamp(480px, calc(100vh - 150px), 880px);
       display: flex;
       flex-direction: column;
       min-width: 0;
+    }
+    body.guided-params-open .guided-tree-host {
+      height: clamp(440px, calc(100vh - 192px), 840px);
+    }
+
+    .guided-below-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 2px 4px;
+      font-size: 12px;
+      color: var(--text-secondary);
     }
 
     .guided-accordions {
@@ -604,6 +663,12 @@
     /* =================================================================== */
     /* MODE B: PRO WORKBENCH WORKSPACE                                     */
     /* =================================================================== */
+    body[data-mode="pro"] {
+      --pro-tree-col: 52%;
+    }
+    @media (max-width: 1240px) {
+      body[data-mode="pro"] { --pro-tree-col: 48%; }
+    }
     #proRoot {
       display: none;
       flex: 1 1 auto;
@@ -613,17 +678,28 @@
     }
     body[data-mode="pro"] #proRoot {
       display: grid;
-      grid-template-columns: minmax(360px, 42%) minmax(0, 58%);
+      grid-template-columns: minmax(400px, var(--pro-tree-col, 52%)) 5px minmax(0, 1fr);
     }
 
     .pro-left-pane {
-      border-right: 1px solid var(--border-hairline);
       background: var(--bg-surface);
       display: flex;
       flex-direction: column;
       min-width: 0;
       min-height: 0;
       overflow: hidden;
+    }
+
+    .pro-split-handle {
+      width: 5px;
+      background: var(--border-hairline);
+      cursor: col-resize;
+      transition: background 0.12s;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .pro-split-handle:hover, .pro-split-handle.dragging {
+      background: var(--accent-primary);
     }
 
     .pro-right-pane {
@@ -940,28 +1016,35 @@
       min-width: 0;
     }
     .tree-toolbar {
-      padding: 6px 10px;
+      padding: 5px 10px;
       background: var(--bg-subtle);
       border-bottom: 1px solid var(--border-hairline);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
       flex-shrink: 0;
     }
+    .tree-toolbar::-webkit-scrollbar { display: none; }
     .legend-strip {
-      padding: 4px 10px;
+      padding: 3px 10px;
       border-bottom: 1px solid var(--border-hairline);
       background: var(--bg-surface);
       display: flex;
       align-items: center;
       gap: 10px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      white-space: nowrap;
       font-size: 10.5px;
       color: var(--text-secondary);
       flex-shrink: 0;
     }
+    .legend-strip::-webkit-scrollbar { display: none; }
     .swatch {
       display: inline-block;
       width: 8px; height: 8px;
@@ -983,10 +1066,10 @@
 
     .minimap-box {
       position: absolute;
-      right: 10px;
-      bottom: 10px;
-      width: 168px;
-      height: 112px;
+      left: 12px;
+      bottom: 12px;
+      width: 148px;
+      height: 94px;
       background: rgba(255, 255, 255, 0.94);
       border: 1px solid var(--border-strong);
       border-radius: 7px;
@@ -1012,8 +1095,8 @@
     .subtree-banner {
       display: none;
       position: absolute;
-      left: 10px;
-      top: 10px;
+      left: 12px;
+      top: 12px;
       z-index: 12;
       background: var(--text-primary);
       color: #FFFFFF;
@@ -1025,6 +1108,30 @@
       gap: 8px;
     }
     .subtree-banner.visible { display: inline-flex; }
+
+    .guided-selection-card {
+      display: none;
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      z-index: 13;
+      width: min(340px, calc(100% - 24px));
+      background: rgba(255, 255, 255, 0.97);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.14);
+      padding: 10px 12px;
+      backdrop-filter: blur(4px);
+    }
+    .guided-selection-card.visible {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .guided-selection-card.under-banner {
+      top: 48px;
+    }
+    body[data-mode="pro"] #guidedSelectionCard { display: none !important; }
 
     .canvas-hud-tooltip {
       display: none;
@@ -1287,64 +1394,55 @@
   </section>
 
   <!-- =================================================================== -->
-  <!-- MODE A: GUIDED VIEW (CALM PROGRESSIVE DISCLOSURE)                   -->
+  <!-- WINDOW-WIDE DRAG-AND-DROP OVERLAY                                   -->
   <!-- =================================================================== -->
-  <main id="guidedRoot"
-        ondragover="onDropzoneDragOver(event)"
-        ondragleave="onDropzoneDragLeave(event)"
-        ondrop="onDropzoneDrop(event)">
-    <!-- Element 1: Quiet Single-Line Drop / Input Bar -->
-    <div id="guidedDropzone" class="guided-dropbar">
-      <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
-        <strong style="font-size:13px; color:var(--text-primary);">Analyze your own sequences or tree</strong>
-        <span style="font-size:12px; color:var(--text-muted);">Drop a FASTA, PHYLIP, NEXUS, CSV/TSV, Newick, or <code>.bwz</code> file anywhere on this page — runs 100% locally in WebAssembly.</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Choose File…</button>
-        <button class="btn" onclick="openPasteModal()">Paste</button>
-        <button class="btn" onclick="openStreamModal()">Fetch NCBI / URL</button>
-      </div>
+  <div id="windowDropOverlay" class="window-drop-overlay" aria-hidden="true">
+    <div class="window-drop-card">
+      <div style="font-size:15px; font-weight:700; color:var(--accent-primary); margin-bottom:6px;">Drop Alignment or Tree File</div>
+      <div style="font-size:12.5px; color:var(--text-secondary);">Drop FASTA, PHYLIP, NEXUS, CSV/TSV, Newick, or <code>.bwz</code> file to infer tree locally in WebAssembly</div>
     </div>
+  </div>
 
-    <!-- Element 2: Unified Plain-Language Summary + Live Tree Card -->
-    <section class="guided-hero-card">
-      <div class="guided-hero-top">
-        <div class="guided-hero-head">
-          <div style="min-width:0; flex:1;">
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
-              <span id="gDatasetBadge" class="status-badge ref">PRESTIN CDS</span>
-              <span id="gDeltaNote" class="status-badge warn" style="display:none;">~ Tuned Override</span>
-            </div>
-            <h1 id="gHeadlineVerdict" style="font-size:17px; font-weight:700; color:var(--text-primary); letter-spacing:-0.01em;">Loading example cohort in WebAssembly…</h1>
-            <p id="gSubVerdict" style="font-size:13px; color:var(--text-secondary); margin-top:4px;">BUSHWHACKER compresses sequences along a phylogeny—collapsing unsupported splits into polytomies and isolating convergent or horizontal transfer signals.</p>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-            <button id="btnGuidedSettings" class="btn" onclick="toggleGuidedSettings()">Settings ▾</button>
-            <button class="btn btn-primary" onclick="setUiMode('pro')">Open Workbench <kbd style="background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.35); color:#fff;">m</kbd></button>
-          </div>
+  <!-- =================================================================== -->
+  <!-- MODE A: GUIDED VIEW (TREE CENTERPIECE ABOVE THE FOLD)               -->
+  <!-- =================================================================== -->
+  <main id="guidedRoot">
+    <!-- Element 1: Unified Centerpiece Tree Stage -->
+    <section class="guided-stage-card">
+      <div class="guided-stage-bar">
+        <div class="guided-stage-left">
+          <span id="gDatasetBadge" class="status-badge ref">PRESTIN CDS</span>
+          <span id="gDeltaNote" class="status-badge warn" style="display:none;">~ Tuned</span>
+          <h1 id="gHeadlineVerdict" class="guided-stage-title">Loading example cohort…</h1>
+          <span class="guided-kpi-pill" title="Supported internal splits vs. collapsed polytomy hubs">
+            <strong id="gStatTopo">—</strong>
+          </span>
+          <span class="guided-kpi-pill pass" title="MDL graph description length compared to Star-Tree baseline">
+            <strong id="gStatComp">—</strong>
+            <span id="gStatCompSub" class="mono" style="font-size:10.5px;"></span>
+          </span>
+          <button type="button" id="gShuntPillBtn" class="guided-kpi-pill shunt sparse" onclick="focusGuidedShuntOnTree()" title="Click to inspect non-tree shunt directly on the tree">
+            <strong id="gStatShunt">—</strong>
+            <span id="gStatShuntSub" class="mono" style="font-size:10.5px;"></span>
+          </button>
         </div>
-
-        <div class="guided-stats-row">
-          <div class="guided-stat-item">
-            <span class="guided-stat-label">Compression</span>
-            <div><strong id="gStatComp" class="guided-stat-val" style="color:var(--pass-ink);">—</strong> <span id="gStatCompSub" class="mono" style="font-size:11.5px; color:var(--text-muted);"></span></div>
-          </div>
-          <div class="guided-stat-item">
-            <span class="guided-stat-label">Tree Structure</span>
-            <div><strong id="gStatTopo" class="guided-stat-val">—</strong> <span class="mono" style="font-size:11.5px; color:var(--text-muted);">unsupported stems collapsed</span></div>
-          </div>
-          <div class="guided-stat-item">
-            <span class="guided-stat-label">Non-Tree Signal</span>
-            <div><strong id="gStatShunt" class="guided-stat-val" style="color:var(--sparse-ink);">—</strong> <span id="gStatShuntSub" class="mono" style="font-size:11.5px; color:var(--text-muted);"></span></div>
-          </div>
+        <div class="guided-stage-right">
+          <button id="btnGuidedSettings" class="btn btn-xs" onclick="toggleGuidedSettings()">Settings ▾</button>
+          <button class="btn btn-xs btn-primary" onclick="setUiMode('pro')">Workbench <kbd style="background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.35); color:#fff;">m</kbd></button>
         </div>
       </div>
 
-      <!-- Always-visible Interactive Tree Canvas in Guided Mode -->
+      <!-- Centerpiece Interactive Tree Canvas in Guided Mode -->
       <div id="guidedTreeHost" class="guided-tree-host"></div>
     </section>
 
-    <!-- Element 3: Quiet Collapsible Accordions (Closed by Default) -->
+    <!-- Quiet Single-Line Summary Caption + Local Drop Hint -->
+    <div class="guided-below-caption">
+      <p id="gSubVerdict" style="margin:0;">BUSHWHACKER compresses sequences along a phylogeny—collapsing unsupported splits into polytomies and isolating convergent or horizontal transfer signals.</p>
+      <span class="mono" style="font-size:11px; color:var(--text-muted);">Drop any alignment, character matrix, Newick, or <code>.bwz</code> file anywhere on this window · Runs 100% locally in WebAssembly</span>
+    </div>
+
+    <!-- Element 2: Quiet Collapsible Accordions (Closed by Default) -->
     <section class="guided-accordions">
       <details class="guided-accordion" id="accShunts">
         <summary>
@@ -1407,6 +1505,7 @@
   <main id="proRoot">
     <!-- Left Split Pane: Interactive Tree Canvas -->
     <section class="pro-left-pane" id="proTreeHost"></section>
+    <div id="proSplitHandle" class="pro-split-handle" title="Drag to resize tree pane"></div>
 
     <!-- Right Split Pane: Matrix (Top) + Multi-Track Inspector (Bottom) -->
     <section class="pro-right-pane">
@@ -1495,38 +1594,41 @@
   <!-- REUSABLE INTERACTIVE TREE PANEL (moved cleanly between Guided & Workbench hosts) -->
   <div id="sharedTreePanel" class="tree-panel" style="display:none;">
     <div class="tree-toolbar">
-      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:6px; flex-wrap:nowrap; flex-shrink:0;">
         <div class="preset-pills">
           <button id="btnLayoutPhylogram" class="preset-btn active" onclick="setLayoutMode('phylogram')">Phylogram</button>
           <button id="btnLayoutCladogram" class="preset-btn" onclick="setLayoutMode('cladogram')">Cladogram</button>
           <button id="btnLayoutCircular" class="preset-btn" onclick="setLayoutMode('circular')">Circular</button>
         </div>
-        <select id="selColorMode" class="clean-select pro-tree-ctrl" style="height:25px; font-size:11px;" onchange="renderCanvas()">
+        <select id="selColorMode" class="clean-select" style="height:24px; font-size:11px;" onchange="renderCanvas()">
           <option value="clade">Color: Clades</option>
           <option value="support">Color: P_local</option>
           <option value="regime">Color: Polytomies</option>
           <option value="mutations">Color: m_e</option>
         </select>
-        <label class="toggle-chip pro-tree-ctrl"><input type="checkbox" id="chkShowRibbons" checked onchange="renderCanvas()" /><span>Ribbons</span></label>
-        <label class="toggle-chip pro-tree-ctrl"><input type="checkbox" id="chkShowPolytomyBadges" checked onchange="renderCanvas()" /><span>Hub ◆</span></label>
-        <label class="toggle-chip pro-tree-ctrl"><input type="checkbox" id="chkShowShunts" checked onchange="renderCanvas()" /><span>Shunts</span></label>
-        <label class="toggle-chip pro-tree-ctrl"><input type="checkbox" id="chkHumanLabels" checked onchange="onCommonNamesToggle()" /><span>Species</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowRibbons" checked onchange="renderCanvas()" /><span>Ribbons</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowPolytomyBadges" checked onchange="renderCanvas()" /><span>Hub ◆</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowShunts" checked onchange="renderCanvas()" /><span>Shunts</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkHumanLabels" checked onchange="onCommonNamesToggle()" /><span>Species</span></label>
       </div>
-      <div style="display:flex; align-items:center; gap:4px;">
+      <div style="display:flex; align-items:center; gap:4px; flex-wrap:nowrap; flex-shrink:0;">
+        <input type="text" id="treeSearchInput" class="clean-input" style="width:130px; height:24px; font-size:11px;" placeholder="Find taxon…" oninput="onMatrixSearchInput(this.value)" />
         <button class="btn btn-xs" onclick="fitTreeToScreen()">Fit</button>
         <button class="btn btn-xs" onclick="zoomBy(1.28)">+</button>
         <button class="btn btn-xs" onclick="zoomBy(0.78)">−</button>
-        <button class="btn btn-xs pro-tree-ctrl" onclick="expandAllWedges()">Unfold</button>
+        <button id="btnToggleMinimap" class="btn btn-xs" onclick="toggleMinimapMode()" title="Toggle overview minimap (Auto shows when zoomed or >160 tips)">Map</button>
+        <button class="btn btn-xs" onclick="expandAllWedges()">Unfold</button>
       </div>
     </div>
-    <div id="legendBar" class="legend-strip pro-tree-ctrl"></div>
+    <div id="legendBar" class="legend-strip"></div>
     <div class="tree-viewport" id="treeViewport">
       <div id="subtreeBanner" class="subtree-banner">
         <span id="subtreeBannerText">Subtree isolated</span>
         <button class="btn btn-xs" onclick="exitFocusedSubtree()">← Full Tree</button>
       </div>
+      <div id="guidedSelectionCard" class="guided-selection-card" aria-live="polite"></div>
       <canvas id="treeCanvas"></canvas>
-      <div class="minimap-box" id="minimapBox">
+      <div class="minimap-box" id="minimapBox" style="display:none;">
         <div class="minimap-header"><span>MAP</span><span id="minimapRangeLabel">—</span></div>
         <canvas id="minimapCanvas"></canvas>
       </div>
@@ -2092,6 +2194,7 @@
     const collapsedNodeIds = new Set();
     const groupColorMap = new Map();
     let layoutMode = 'phylogram';
+    let minimapMode = 'auto'; // 'auto' | 'on' | 'off'
     let cam = { x: 40, y: 30, scale: 1.0, _rowH: 14, _treeW: 400 };
     let hoveredElement = null;
     let selectedElement = null;
@@ -2240,6 +2343,7 @@
       document.body.classList.toggle('guided-params-open', guidedParamsOpen);
       const btn = document.getElementById('btnGuidedSettings');
       if (btn) btn.textContent = guidedParamsOpen ? 'Settings ▴' : 'Settings ▾';
+      requestAnimationFrame(() => fitTreeToScreen());
     };
 
     // =========================================================================
@@ -3389,6 +3493,29 @@
       document.getElementById('btnLayoutCircular')?.classList.toggle('active', mode === 'circular');
       fitTreeToScreen();
     };
+    function computeRectTreeMargins(width, showRib) {
+      if (width >= 960) {
+        const labelPad = showRib ? Math.min(248, Math.max(150, Math.floor(width * 0.21))) : 236;
+        const rightReserve = showRib ? (labelPad + 102) : (labelPad + 16);
+        return { labelPad, rightReserve };
+      }
+      const labelPad = showRib ? Math.min(176, Math.max(108, Math.floor(width * 0.25))) : 164;
+      const rightReserve = showRib ? (labelPad + 88) : (labelPad + 14);
+      return { labelPad, rightReserve };
+    }
+
+    function shouldShowMinimap(layout) {
+      if (minimapMode === 'on') return true;
+      if (minimapMode === 'off') return false;
+      return cam.scale > 1.08 || Boolean(layout && layout.nVisibleLeaves > 160);
+    }
+
+    window.toggleMinimapMode = function() {
+      const layout = computeTreeLayout();
+      minimapMode = shouldShowMinimap(layout) ? 'off' : 'on';
+      renderCanvas();
+    };
+
     window.fitTreeToScreen = function() {
       const canvas = document.getElementById('treeCanvas');
       if (!canvas) return;
@@ -3396,8 +3523,7 @@
       if (rect.width < 10 || rect.height < 10) return;
       const layout = computeTreeLayout();
       const showRib = Boolean(document.getElementById('chkShowRibbons')?.checked) && groupColorMap.size > 0;
-      const labelPad = showRib ? Math.min(148, Math.max(102, Math.floor(rect.width * 0.27))) : 148;
-      const rightReserve = showRib ? (labelPad + 92) : 158;
+      const { rightReserve } = computeRectTreeMargins(rect.width, showRib);
       if (layoutMode === 'circular') { cam.scale = 1; cam.x = rect.width * 0.5; cam.y = rect.height * 0.5; }
       else {
         const rowH = Math.max(2.0, Math.min(18, (rect.height - 40) / layout.nVisibleLeaves));
@@ -3418,7 +3544,16 @@
       renderCanvas();
     };
     window.expandAllWedges = function() { collapsedNodeIds.clear(); renderCanvas(); };
-    window.onCommonNamesToggle = function() { renderCanvas(); if (selectedRecordId) renderInspector(); };
+    window.onCommonNamesToggle = function() {
+      renderCanvas();
+      if (selectedRecordId) {
+        renderInspector();
+        if (uiMode === 'guided' && document.getElementById('guidedSelectionCard')?.classList.contains('visible')) {
+          const rec = allMatrixRecords.find(r => r.id === selectedRecordId);
+          if (rec) renderGuidedSelectionCard(rec);
+        }
+      }
+    };
 
     window.renderCanvas = function() {
       const canvas = document.getElementById('treeCanvas');
@@ -3458,8 +3593,7 @@
 
     function renderRectangularTree(ctx, rect, layout, opts) {
       const showRib = opts.showRibbons && groupColorMap.size > 0;
-      const labelPad = showRib ? Math.min(148, Math.max(102, Math.floor(rect.width * 0.27))) : 148;
-      const rightReserve = showRib ? (labelPad + 92) : 158;
+      const { labelPad, rightReserve } = computeRectTreeMargins(rect.width, showRib);
       const baseRowH = cam._rowH || Math.max(2, Math.min(18, (rect.height - 40) / layout.nVisibleLeaves));
       const baseTreeW = cam._treeW || Math.max(100, rect.width - 24 - rightReserve);
       const rowH = baseRowH * cam.scale, treeW = baseTreeW * cam.scale;
@@ -3505,23 +3639,74 @@
       }
 
       if (opts.showShunts && currentResult && currentResult.shunts) {
+        const drawnShunts = [];
         currentResult.shunts.forEach((sh, idx) => {
           const nu = nodeById.get(sh.node_u), nv = nodeById.get(sh.node_v);
           if (!nu || !nv || nu._sx === undefined || nv._sx === undefined) return;
           const x1 = nu._sx, y1 = nu._sy, x2 = nv._sx, y2 = nv._sy;
-          const midX = Math.max(x1, x2) + 40 + 0.16 * Math.abs(y2 - y1), midY = 0.5 * (y1 + y2);
+          const hasLeaf = nu.isLeaf || nv.isLeaf;
+          const rawMidX = hasLeaf
+            ? Math.max(x1, x2) + 22 + 0.08 * Math.abs(y2 - y1)
+            : Math.max(x1, x2) + 38 + 0.15 * Math.abs(y2 - y1);
+          const midX = hasLeaf ? Math.min(maxTipX + 8, rawMidX) : Math.min(maxTipX - 8, rawMidX);
+          const midY = 0.5 * (y1 + y2);
           const isSparse = sh.mode === 'SPARSE', isSel = selShuntIdx === idx;
+          const strokeCol = isSparse ? '#C2410C' : '#1D4ED8';
           ctx.save();
-          ctx.strokeStyle = isSparse ? '#C2410C' : '#1D4ED8';
+          ctx.strokeStyle = strokeCol;
           ctx.lineWidth = isSel ? 3.4 : 2.1;
           ctx.setLineDash(isSparse ? [5, 3] : [8, 3]);
           ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo(midX, midY, x2, y2); ctx.stroke();
           sh._bx = 0.25 * x1 + 0.5 * midX + 0.25 * x2; sh._by = 0.25 * y1 + 0.5 * midY + 0.25 * y2; sh._idx = idx;
           ctx.setLineDash([]);
-          ctx.fillStyle = isSparse ? '#C2410C' : '#1D4ED8';
-          ctx.beginPath(); ctx.arc(sh._bx, sh._by, isSel ? 6.5 : 5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath(); ctx.arc(sh._bx, sh._by, isSel ? 8.5 : 7, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = strokeCol;
+          ctx.beginPath(); ctx.arc(sh._bx, sh._by, isSel ? 6.2 : 4.8, 0, Math.PI * 2); ctx.fill();
           ctx.restore();
+          drawnShunts.push({ sh, strokeCol });
         });
+        if (rect.width >= 680 && drawnShunts.length > 0) {
+          const placedPills = [];
+          const dyOffsets = [0, -20, 20, -40, 40];
+          const maxRight = Math.max(8, maxTipX - 4);
+          drawnShunts.forEach(({ sh, strokeCol }) => {
+            ctx.save();
+            const tag = `+${sh.net_mdl_gain_nats.toFixed(1)} nats`;
+            ctx.font = '700 10px JetBrains Mono, monospace';
+            const tw = ctx.measureText(tag).width + 10;
+            const rawLeft = sh._bx - tw - 10;
+            const rawRight = sh._bx + 10;
+            const xCandidates = rawLeft >= 8
+              ? [Math.min(maxRight - tw, rawLeft), Math.max(8, Math.min(maxRight - tw, rawRight))]
+              : [Math.max(8, Math.min(maxRight - tw, rawRight)), Math.max(8, Math.min(maxRight - tw, rawLeft))];
+            let bestX = xCandidates[0], bestY = Math.max(4, Math.min(rect.height - 22, sh._by - 9));
+            let found = false;
+            for (const dy of dyOffsets) {
+              const candY = Math.max(4, Math.min(rect.height - 22, sh._by - 9 + dy));
+              for (const candX of xCandidates) {
+                const hitsPill = placedPills.some(p => !(candX + tw + 2 < p.x || p.x + p.w + 2 < candX || candY + 18 + 2 < p.y || p.y + p.h + 2 < candY));
+                const hitsDot = drawnShunts.some(d => Math.abs((candX + tw * 0.5) - d.sh._bx) < (tw * 0.5 + 8) && Math.abs((candY + 9) - d.sh._by) < 17);
+                if (!hitsPill && !hitsDot) {
+                  bestX = candX; bestY = candY; found = true; break;
+                }
+              }
+              if (found) break;
+            }
+            placedPills.push({ x: bestX, y: bestY, w: tw, h: 18 });
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+            ctx.strokeStyle = strokeCol;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            if (ctx.roundRect) ctx.roundRect(bestX, bestY, tw, 18, 9);
+            else ctx.rect(bestX, bestY, tw, 18);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = strokeCol;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(tag, bestX + 5, bestY + 9);
+            ctx.restore();
+          });
+        }
       }
 
       for (const nd of layout.visibleNodes) {
@@ -3597,16 +3782,27 @@
 
     const minimapState = { valid: false, lensX: 0, lensY: 0, lensW: 0, lensH: 0, rawLensCX: 0, rawLensCY: 0, offX: 0, offY: 0, scaleX: 1, scaleY: 1, worldMinX: 0, worldMaxX: 1, worldMinY: 0, worldMaxY: 1, mainW: 1, mainH: 1, mode: 'phylogram' };
     function renderMinimap(layout) {
+      const box = document.getElementById('minimapBox');
       const mini = document.getElementById('minimapCanvas'), main = document.getElementById('treeCanvas');
       const lbl = document.getElementById('minimapRangeLabel');
+      const showMini = shouldShowMinimap(layout);
+      document.getElementById('btnToggleMinimap')?.classList.toggle('btn-primary', showMini);
+      if (!showMini) {
+        if (box) box.style.display = 'none';
+        minimapState.valid = false;
+        return;
+      }
+      if (box) box.style.display = 'flex';
       if (!mini || !main || !layout.visibleNodes || layout.visibleNodes.length === 0) return;
       const r = mini.getBoundingClientRect(), mr = main.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
       if (r.width < 10 || mr.width < 10) return;
       if (mini.width !== Math.floor(r.width * dpr) || mini.height !== Math.floor(r.height * dpr)) { mini.width = Math.floor(r.width * dpr); mini.height = Math.floor(r.height * dpr); }
       const ctx = mini.getContext('2d');
       ctx.save(); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, r.width, r.height);
+      const showRib = Boolean(document.getElementById('chkShowRibbons')?.checked) && groupColorMap.size > 0;
+      const { rightReserve } = computeRectTreeMargins(mr.width, showRib);
       const nL = layout.nVisibleLeaves, bRowH = cam._rowH || 10, bTreeW = cam._treeW || 200;
-      const wMaxX = bTreeW + 160, wMaxY = Math.max(10, (nL - 1) * bRowH);
+      const wMaxX = bTreeW + rightReserve, wMaxY = Math.max(10, (nL - 1) * bRowH);
       const sx = (r.width - 12) / Math.max(1, wMaxX), sy = (r.height - 10) / Math.max(1, wMaxY);
       const yDen = Math.max(1, nL - 1);
       ctx.strokeStyle = '#64748B'; ctx.lineWidth = 0.7; ctx.beginPath();
@@ -3661,7 +3857,7 @@
         }
         const mx = e.clientX - rect.left, my = e.clientY - rect.top;
         const tt = document.getElementById('canvasTooltip');
-        if (mx < 0 || my < 0 || mx > rect.width || my > rect.height || e.target?.closest?.('.minimap-box')) {
+        if (mx < 0 || my < 0 || mx > rect.width || my > rect.height || e.target?.closest?.('.minimap-box') || e.target?.closest?.('#guidedSelectionCard')) {
           if (tt) tt.style.display = 'none';
           return;
         }
@@ -3691,13 +3887,16 @@
             const hit = hitTestCanvas(mx, my);
             if (hit) {
               selectedElement = hit;
+              let matchedRec = null;
               if (hit.type === 'shunt') {
-                const rec = allMatrixRecords.find(r => r.kind === 'SHUNT' && r.shunt === hit.data);
-                if (rec) selectMatrixRecord(rec.id, true);
+                matchedRec = allMatrixRecords.find(r => r.kind === 'SHUNT' && r.shunt === hit.data);
               } else {
                 const nd = hit.data;
-                const rec = allMatrixRecords.find(r => r.node && r.node.id === nd.id && (nd.isLeaf ? r.kind === 'TAXON' : (nd.degree >= 4 ? r.kind === 'POLYTOMY' : r.kind === 'SPLIT')));
-                if (rec) selectMatrixRecord(rec.id, true);
+                matchedRec = allMatrixRecords.find(r => r.node && r.node.id === nd.id && (nd.isLeaf ? r.kind === 'TAXON' : (nd.degree >= 4 ? r.kind === 'POLYTOMY' : r.kind === 'SPLIT')));
+              }
+              if (matchedRec) {
+                selectMatrixRecord(matchedRec.id, uiMode === 'pro');
+                if (uiMode === 'guided') renderGuidedSelectionCard(matchedRec);
               }
               renderCanvas();
             }
@@ -3729,7 +3928,12 @@
       renderProMatrix();
     };
     window.onMatrixSearchInput = function(val) {
-      matrixSearchQuery = (val || '').trim();
+      const rawVal = val || '';
+      matrixSearchQuery = rawVal.trim();
+      const mIn = document.getElementById('matrixSearchInput');
+      const tIn = document.getElementById('treeSearchInput');
+      if (mIn && mIn.value !== rawVal) mIn.value = rawVal;
+      if (tIn && tIn.value !== rawVal) tIn.value = rawVal;
       renderProMatrix();
       renderCanvas();
     };
@@ -4218,17 +4422,68 @@
         </div>`;
     }
 
+    window.renderGuidedSelectionCard = function(rec) {
+      const card = document.getElementById('guidedSelectionCard');
+      if (!card || !rec) return;
+      const bannerOpen = document.getElementById('subtreeBanner')?.classList.contains('visible');
+      card.classList.toggle('under-banner', Boolean(bannerOpen));
+      let detailHtml = '';
+      if (rec.kind === 'SHUNT' && rec.shunt) {
+        const sh = rec.shunt;
+        const isCoding = (currentResult?.alphabet_mode || stage0Data?.effectiveMode) === 'nucleotide' && stage0Data?.isCoding;
+        const locusTxt = (sh.mode === 'INTERVAL' && sh.interval_span)
+          ? `Contiguous interval bp [${sh.interval_span[0] + 1}..${sh.interval_span[1] + 1}] (${sh.sites.length} sites)`
+          : (isCoding ? `Codons [${[...new Set(sh.sites.map(s => Math.floor(s / 3) + 1))].join(', ')}] (${sh.sites.length} bp)` : `Sites [${sh.sites.slice(0, 10).map(s => s + 1).join(', ')}]`);
+        detailHtml = `<div class="mono" style="font-size:11.5px; color:var(--text-primary); font-weight:600;">+${sh.net_mdl_gain_nats.toFixed(2)} nats · P_local = ${(sh.posterior_prob * 100).toFixed(2)}%</div><div class="mono" style="font-size:11px; color:var(--text-secondary);">${escapeHtml(locusTxt)}</div>`;
+      } else if (rec.kind === 'SPLIT' && rec.branch) {
+        const b = rec.branch;
+        detailHtml = `<div class="mono" style="font-size:11.5px; color:var(--text-primary); font-weight:600;">+${b.mdl_gain_nats.toFixed(2)} nats · P_local = ${(b.mdl_support * 100).toFixed(2)}% · m_e = ${b.mutation_count.toFixed(1)}</div>`;
+      } else if (rec.kind === 'POLYTOMY' && rec.node) {
+        detailHtml = `<div class="mono" style="font-size:11.5px; color:var(--text-primary); font-weight:600;">${rec.node.degree}-way polytomy hub (${rec.node.degree - 3} unsupported stems collapsed)</div>`;
+      } else {
+        detailHtml = `<div class="mono" style="font-size:11px; color:var(--text-secondary);">${escapeHtml(rec.metricPrimary)} · ${escapeHtml(rec.metricSecondary)}</div>`;
+      }
+      const canTree = Boolean(rec.node && !rec.node.isLeaf);
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+          <span class="status-badge ${rec.verdict.cls}">${escapeHtml(rec.kind)} · ${escapeHtml(rec.verdict.label)}</span>
+          <button class="btn btn-xs" style="height:20px; padding:0 6px;" onclick="dismissGuidedSelectionCard()" title="Dismiss">✕</button>
+        </div>
+        <div>
+          <div class="mono" style="font-size:12px; font-weight:700; color:var(--text-primary); word-break:break-word;">${escapeHtml(rec.label)}</div>
+          <div style="font-size:11.5px; color:var(--text-secondary);">${escapeHtml(rec.scope)}</div>
+        </div>
+        ${detailHtml}
+        <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:2px;">
+          ${canTree ? `<button class="btn btn-xs" onclick="inspectorActionFocus(); renderGuidedSelectionCard(allMatrixRecords.find(r => r.id === selectedRecordId));">Focus Clade</button><button class="btn btn-xs" onclick="inspectorActionFold()">Fold/Unfold</button>` : ''}
+          <button class="btn btn-xs btn-primary" onclick="const id = selectedRecordId; setUiMode('pro'); if (id) selectMatrixRecord(id, true);">4-Track Proof in Workbench →</button>
+        </div>`;
+      card.classList.add('visible');
+    };
+    window.dismissGuidedSelectionCard = function() {
+      document.getElementById('guidedSelectionCard')?.classList.remove('visible');
+    };
+    window.focusGuidedShuntOnTree = function() {
+      const rec = allMatrixRecords.find(r => r.kind === 'SHUNT') || allMatrixRecords[0];
+      if (!rec) return;
+      selectedElement = rec.shunt ? { type: 'shunt', data: rec.shunt } : (rec.node ? { type: 'branch', data: rec.node } : null);
+      selectMatrixRecord(rec.id, false);
+      renderGuidedSelectionCard(rec);
+    };
+
     window.inspectorActionFocus = function() {
       const rec = allMatrixRecords.find(r => r.id === selectedRecordId);
       if (!rec || !rec.node || rec.node.isLeaf) return;
       focusedSubtreeRoot = rec.node;
       document.getElementById('subtreeBannerText').textContent = `Subtree: ${rec.node.rawLabel} (${rec.node.leafCount} tips)`;
       document.getElementById('subtreeBanner')?.classList.add('visible');
+      document.getElementById('guidedSelectionCard')?.classList.add('under-banner');
       fitTreeToScreen();
     };
     window.exitFocusedSubtree = function() {
       focusedSubtreeRoot = null;
       document.getElementById('subtreeBanner')?.classList.remove('visible');
+      document.getElementById('guidedSelectionCard')?.classList.remove('under-banner');
       fitTreeToScreen();
     };
     window.inspectorActionReroot = function() {
@@ -4390,20 +4645,26 @@
       const unit = d.unitLabel || 'bp';
       const effSites = (r.l_eff && r.l_eff > 0) ? r.l_eff : d.lEff;
 
-      document.getElementById('gDatasetBadge').textContent = (currentDataset && !customDataset) ? currentDataset.shortName : currentDatasetLabel;
+      document.getElementById('gDatasetBadge').textContent = (currentDataset && !customDataset)
+        ? currentDataset.shortName.replace(/\s*\([^)]+\)\s*$/, '')
+        : currentDatasetLabel;
       document.getElementById('gHeadlineVerdict').textContent =
         r.star_tree_nats > 0
-          ? `${r.n_taxa.toLocaleString()} sequences resolved into ${r.n_internal_branches} supported splits, ${r.polytomy_nodes} polytomy hubs, and ${shunts.length} non-tree shunt${shunts.length === 1 ? '' : 's'}.`
-          : `${r.n_taxa.toLocaleString()} tips laid out with ${r.n_internal_branches} internal branches and ${r.polytomy_nodes} polytomy hubs.`;
+          ? `${r.n_taxa.toLocaleString()} × ${r.n_sites.toLocaleString()} ${unit}`
+          : `${r.n_taxa.toLocaleString()} tips`;
       document.getElementById('gSubVerdict').textContent = r.star_tree_nats > 0
-        ? `Compressed ${r.n_sites.toLocaleString()} ${unit} (${effSites.toFixed(1)} effective) from ${Math.round(r.star_tree_nats).toLocaleString()} to ${Math.round(r.full_graph_nats).toLocaleString()} nats — keeping only clades whose data savings pay for the branch.`
-        : `Loaded pure Newick topology directly for visual exploration and subtree focus.`;
+        ? `Resolved ${r.n_taxa.toLocaleString()} sequences across ${r.n_sites.toLocaleString()} ${unit} (${effSites.toFixed(1)} effective) into ${r.n_internal_branches} supported splits, ${r.polytomy_nodes} polytomies, and ${shunts.length} shunt${shunts.length === 1 ? '' : 's'} — compressing ${Math.round(r.star_tree_nats).toLocaleString()} → ${Math.round(r.full_graph_nats).toLocaleString()} nats.`
+        : `Loaded pure Newick topology directly (${r.n_taxa.toLocaleString()} tips, ${r.n_internal_branches} internal branches, ${r.polytomy_nodes} polytomy hubs) for visual exploration and subtree focus.`;
 
       document.getElementById('gStatComp').textContent = r.star_tree_nats > 0 ? `${pct}% smaller` : 'Topology';
-      document.getElementById('gStatCompSub').textContent = r.star_tree_nats > 0 ? `(${Math.round(r.star_tree_nats).toLocaleString()} → ${Math.round(r.full_graph_nats).toLocaleString()} nats)` : `${r.n_taxa.toLocaleString()} tips`;
+      document.getElementById('gStatCompSub').textContent = r.star_tree_nats > 0 ? `(${Math.round(r.star_tree_nats).toLocaleString()}→${Math.round(r.full_graph_nats).toLocaleString()} nats)` : `${r.n_taxa.toLocaleString()} tips`;
       document.getElementById('gStatTopo').textContent = `${r.n_internal_branches} splits · ${r.polytomy_nodes} polytomies`;
       document.getElementById('gStatShunt').textContent = shunts.length > 0 ? `${shunts.length} ${nInt > 0 && nSp === 0 ? 'horizontal transfer' : (nSp > 0 && nInt === 0 ? 'convergent shunt' : 'shunt')}${shunts.length === 1 ? '' : 's'}` : '0 shunts (tree-like)';
-      document.getElementById('gStatShuntSub').textContent = shunts.length > 0 ? `(+${shunts[0].net_mdl_gain_nats.toFixed(2)} nats, P=${(shunts[0].posterior_prob * 100).toFixed(1)}%)` : '';
+      document.getElementById('gStatShuntSub').textContent = shunts.length > 0 ? `(+${shunts[0].net_mdl_gain_nats.toFixed(2)}, P=${(shunts[0].posterior_prob * 100).toFixed(1)}%)` : '';
+      const shBtn = document.getElementById('gShuntPillBtn');
+      if (shBtn) {
+        shBtn.className = `guided-kpi-pill shunt ${shunts.length === 0 ? 'pass' : (nInt > 0 && nSp === 0 ? 'ref' : 'sparse')}`;
+      }
 
       // Accordion 1: QA
       const highGap = d.taxaRecords.filter(x => x.isHighGap).length;
@@ -4555,6 +4816,8 @@
       baselineCallMap = null;
       selectedRecordId = null;
       pinnedCrosshairSite = null;
+      minimapMode = 'auto';
+      dismissGuidedSelectionCard();
       computeStage0QA();
       await runFullInferencePipeline(true);
     }
@@ -4609,9 +4872,58 @@
     }
 
     window.handleFileUpload = e => { if (e.target.files?.[0]) processUploadedFileObject(e.target.files[0]); e.target.value = ''; };
-    window.onDropzoneDragOver = e => { e.preventDefault(); document.getElementById('guidedDropzone')?.classList.add('dragover'); };
-    window.onDropzoneDragLeave = e => { e.preventDefault(); document.getElementById('guidedDropzone')?.classList.remove('dragover'); };
-    window.onDropzoneDrop = e => { e.preventDefault(); document.getElementById('guidedDropzone')?.classList.remove('dragover'); if (e.dataTransfer?.files?.[0]) processUploadedFileObject(e.dataTransfer.files[0]); };
+
+    function setupWindowDragAndDrop() {
+      const overlay = document.getElementById('windowDropOverlay');
+      let dragDepth = 0;
+      window.addEventListener('dragenter', e => {
+        e.preventDefault();
+        dragDepth++;
+        overlay?.classList.add('active');
+      });
+      window.addEventListener('dragover', e => {
+        e.preventDefault();
+      });
+      window.addEventListener('dragleave', e => {
+        e.preventDefault();
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (dragDepth === 0) overlay?.classList.remove('active');
+      });
+      window.addEventListener('drop', e => {
+        e.preventDefault();
+        dragDepth = 0;
+        overlay?.classList.remove('active');
+        if (e.dataTransfer?.files?.[0]) processUploadedFileObject(e.dataTransfer.files[0]);
+      });
+    }
+
+    function setupProSplitResizer() {
+      const handle = document.getElementById('proSplitHandle');
+      const proRoot = document.getElementById('proRoot');
+      if (!handle || !proRoot) return;
+      let dragging = false;
+      handle.addEventListener('mousedown', e => {
+        e.preventDefault();
+        dragging = true;
+        handle.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+      });
+      window.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const rect = proRoot.getBoundingClientRect();
+        if (rect.width < 200) return;
+        const pct = Math.max(34, Math.min(70, ((e.clientX - rect.left) / rect.width) * 100));
+        document.body.style.setProperty('--pro-tree-col', `${pct.toFixed(1)}%`);
+        fitTreeToScreen();
+        renderInspectorTracks();
+      });
+      window.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false;
+        handle.classList.remove('dragging');
+        document.body.style.cursor = '';
+      });
+    }
 
     window.closeModal = id => document.getElementById(id)?.classList.remove('open');
     window.openPasteModal = () => document.getElementById('pasteModal')?.classList.add('open');
@@ -4818,9 +5130,12 @@
       if (ev.key === 'Escape') {
         ['pasteModal', 'streamModal', 'startTreeModal', 'helpModal'].forEach(closeModal);
         document.getElementById('exportDropdown')?.classList.remove('open');
-        const s = document.getElementById('matrixSearchInput');
-        if (inInput && s && document.activeElement === s) {
-          s.value = ''; onMatrixSearchInput(''); s.blur();
+        dismissGuidedSelectionCard();
+        const ms = document.getElementById('matrixSearchInput');
+        const ts = document.getElementById('treeSearchInput');
+        if (inInput && ((ms && document.activeElement === ms) || (ts && document.activeElement === ts))) {
+          onMatrixSearchInput('');
+          document.activeElement.blur();
         }
         return;
       }
@@ -4860,6 +5175,8 @@
       renderDatasetSelector();
       setupTreeCanvasEvents();
       setupTracksScrubberEvents();
+      setupWindowDragAndDrop();
+      setupProSplitResizer();
       setUiMode(detectInitialUiMode(), false);
       await initEngineAndWorker();
       await loadExampleDataset('prestin');
